@@ -7,6 +7,7 @@
   text-decoration: none;
 }
 
+
 .searchbar {
   border-color: #888888;
   border-radius: 20px;
@@ -19,16 +20,49 @@
     width: 100%;
   }
 }
-
 @media (min-width: 551px) {
   .searchbar {
     width: 500px;
   }
 }
 
+
+.searchbar-sm {
+  border-radius: 5px;
+  margin: auto;
+  padding: 7px;
+}
+
+@media only screen and (max-width: 768px) {
+  .searchbar-sm {
+    width: 190px;
+  }
+}
+@media (min-width: 769px) {
+  .searchbar-sm {
+    width: 500px;
+  }
+}
+
+
 .searchbutton {
   background-color: #F8F9FA;
   border-style: none;
   margin: 11px 4px;
   padding: 8px 16px;
+}
+
+
+.text-input-table {
+  margin: 15px 45px;
+}
+
+.text-input-table tr {
+  font-size: 10pt;
+}
+
+.text-input-table tr td .searchbutton {
+  float: right;
+  background-color: #4D90FE;
+  color: #FFFFFF;
 }

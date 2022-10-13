@@ -1,16 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Advanced Search</title>
+        <title>Search</title>
         <meta name="viewport" content="initial-scale=1, width=device-width">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"> </script>
-        <!-- <link href="styles.css" rel="stylesheet"> -->
+        <link href="styles.css" rel="stylesheet">
     </head>
     <body>
-        <form action="https://google.com/search">
-            <input type="text" name="q">
-            <input type="submit" value="Google Search">
-        </form>
+
+        <div class="d-flex bd-highlight mb-3">
+            <div class="me-auto p-2 bd-highlight">
+                <div class="container">
+                    <h1 class="display-2">Advanced Goo</h1>
+                </div>
+            </div>
+            <div class="p-2 bd-highlight">
+                <ul class="navbar">
+                    <div class="container">
+                        <li><a href="index.html" class="btn searchbutton">Back to Search</a></li>
+                    </div>
+                </ul>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center text-center">
+            <div class="container">
+                <form action="https://google.com/search">
+                    <table class="text-input-table">
+                        <tr><td><h4>Find pages with...</h4></td></tr>	
+                        <tr>
+                            <td> All of these words: </td>
+                            <td> <input name="as_q" type="text" class="btn searchbar-sm"> </td>
+                        </tr>
+                        <tr>
+                            <td>This exact word or phrase: </td>
+                            <td><input name="as_epq" type="text" class="btn searchbar-sm"></td>
+                        </tr>
+                        <tr>
+                            <td> Any of these words: </td>
+                            <td> <input name="as_oq" type="text" class="btn searchbar-sm"> </td>
+                        </tr>
+                        <tr>
+                            <td>This exact word or phrase: </td>
+                            <td><input name="as_epq" type="text" class="btn searchbar-sm"></td>
+                        </tr>
+                        <tr>
+                            <td>None of these words: </td>
+                            <td><input name="as_eq" type="text" class="btn searchbar-sm"> </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><input type="submit" value="Advanced Search" class="btn searchbutton"></td>
+                        </tr>
+                    </table>
+                </form> 
+            </div>
+        </div>
     </body>
 </html>
