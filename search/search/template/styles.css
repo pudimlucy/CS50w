@@ -1,13 +1,10 @@
-.navbar {
-  text-align: right;
-}
-
 .navbar li {
   display: inline-block;
   padding: 10px;
 }
 .navbar a {
   color: #202124;
+  text-decoration: none;
 }
 
 .searchbar {
