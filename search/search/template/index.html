@@ -8,11 +8,17 @@
         <!-- <link href="styles.css" rel="stylesheet"> -->
     </head>
     <body>
-        <form action="https://google.com/search">
-            <input type="text" class="btn btn-primary" name="q">
-            <input type="submit" class="btn btn-primary" value="Google Search">
-            <button type="button" class="btn btn-primary"><a href="file:///C:/Users/USER/CS50w/search/search/template/image.html">Image</a></button>
-            <button type="button" class="btn btn-primary"><a href="file:///C:/Users/USER/CS50w/search/search/template/advanced.html">Advanced</a></button>
-        </form>
+        <ul class="navbar">
+    	    <li><a href="images.html">Images</a></li>
+    	    <li><a href="advanced.html">Advanced</a></li>
+        </ul>
+        <div class="center">
+            <h1>Goo</h1>
+            <form action="https://google.com/search">
+                <input type="text" class="btn searchbar" name="q">
+                <i class="bi bi-search"><input type="submit" class="btn searchbutton" value="Google Search"></i>
+                <input type="submit" class="btn searchbutton" value="I'm Feeling Lucky">
+            </form>
+        </div>
     </body>
 </html>
