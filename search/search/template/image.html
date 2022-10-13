@@ -1,16 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Image Search</title>
+        <title>Images</title>
         <meta name="viewport" content="initial-scale=1, width=device-width">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"> </script>
-        <!-- <link href="styles.css" rel="stylesheet"> -->
+        <link href="styles.css" rel="stylesheet">
     </head>
     <body>
-        <form action="https://google.com/search">
-            <input type="text" name="q">
-            <input type="submit" value="Google Search">
-        </form>
+        <div class="d-flex justify-content-end">
+            <ul class="navbar">
+                <div class="container">
+                    <li><a href="index.html" class="btn searchbutton">Back to Search</a></li>
+                </div>
+            </ul>
+        </div>
+        <div class="d-flex justify-content-center text-center">
+            <div class="container">
+                <h1 class="display-2">Image Goo</h1>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center text-center">
+            <div class="container">
+                <form action="https://google.com/search">
+                    <div class="container">
+                        <input type="text" class="btn searchbar" name="q">
+                        <input hidden="true" name="tbm" value="isch">
+                    </div>
+                    <div class="container">
+                        <input type="submit" class="btn searchbutton" value="Image Search">
+                    </div>
+                </form>
+            </div>
+        </div>
     </body>
 </html>
