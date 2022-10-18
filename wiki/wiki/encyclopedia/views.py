@@ -14,7 +14,7 @@ def page(request, title):
     if not page:
         return render(request,"encyclopedia/error.html") 
     else:
-        return render(request,"encyclopedia/titlepage.html",{
+        return render(request,"encyclopedia/entry.html",{
         'title': title, 
         'content': page,
     })
