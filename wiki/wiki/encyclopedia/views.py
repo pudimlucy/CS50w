@@ -23,7 +23,7 @@ def page(request, title):
         )
 
 
-def get_search(request, q):
+def get_search(request):
     searchform = forms.searchform(request.GET)
 
     if request.method == "GET":
