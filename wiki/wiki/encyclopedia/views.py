@@ -41,7 +41,8 @@ def get_search(request, q):
                 return render(request, "encyclopedia/error.html")
             elif len(matches) == 1 and matches[0].lower == search:
                 # one exact match found, loads wiki/[title]
-                return page(request, matches[0])
+                match = matches[0]
+                return page(request, match)
             else:
                 # TODO: multiple matches found, redirect to search.html
                 return index(request)
