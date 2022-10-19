@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 from . import util, forms
 
-form = forms.NewSearchForm()
+form = forms.searchform()
 
 def index(request):
     return render(request, "encyclopedia/index.html", {"entries": util.list_entries(), "form":form})
