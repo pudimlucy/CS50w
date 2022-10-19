@@ -20,6 +20,7 @@ def page(request, title):
             {
                 "title": title,
                 "content": page,
+                "form":form,
             },
         )
 
