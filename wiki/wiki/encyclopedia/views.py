@@ -38,14 +38,26 @@ def get_search(request):
             if len(matches) == 0:
                 # no matches found, loads 404 error
                 # TODO: display search.html with error message
-                return render(request, "encyclopedia/error.html")
+                return render(request,"encyclopedia/search.html",{
+                    'error':"No results found",
+                    "form":search
+                })
             elif len(matches) == 1 and matches[0].lower == search:
                 # one exact match found, loads wiki/[title]
                 match = matches[0]
                 return page(request, match)
             else:
-                # TODO: multiple matches found, redirect to search.html
-                return index(request)
+                #  multiple matches found, redirect to search.html
+                title = [entry for entry in matches if search == entry.lower()]
+
+                if len(title) > 0:
+                    return page(request, title[0])
+                else:
+                    return render(request,"encyclopedia/search.html",{
+                        'results':matches,
+                        "form":search
+
+                    })
 
     # Invalid request, loads index.
     return index(request)
