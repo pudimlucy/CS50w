@@ -9,7 +9,10 @@
     <h1>All Pages</h1>
     <ul>
         {% for entry in entries %}
-            <a href="{% url 'title' title=entry %}">{{ entry }}</a>
+            {% if not entry %}
+            {% else %}
+                <a href="{% url 'title' title=entry %}">{{ entry }}</a>
+            {% endif %}
         {% endfor %}
     </ul>
 
