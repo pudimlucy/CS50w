@@ -19,13 +19,13 @@
                             <input  id ="search" type="submit" value="search">     
                         </form>        
                     </div>
-                    <a href="{% url 'index' %}">Home</a>
-                </div>
-                <div>
-                    Create New Page
-                </div>
-                <div>
-                    Random Page
+                        <a href="{% url 'index' %}">Home</a>
+                    <div>
+                        <a href="{% url 'new' %}">Create New Page</a>
+                    </div>
+                    <div>
+                        Random Page
+                    </div>
                 </div>
                 {% block nav %}
                 {% endblock %}

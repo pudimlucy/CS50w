@@ -69,3 +69,6 @@ def get_search(request):
 
     # Invalid request, loads index.
     return index(request)
+
+def new(request):
+    return render(request, "encyclopedia/new_page.html")
