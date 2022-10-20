@@ -7,6 +7,10 @@
 {% block body %}
     <h1>New Page</h1>
     <div>
-        TODO
+        <form action="{% url 'new'%}" method="POST">
+            {% csrf_token %}                     
+            {{cform}}         
+            <input id="create" type="submit" value="create">
+        </form> 
     </div>
 {% endblock %}

@@ -2,10 +2,12 @@ from django.shortcuts import render
 
 from . import util, forms
 
+
 form = forms.searchform()
 
 
 def index(request):
+
     return render(
         request,
         "encyclopedia/index.html",
@@ -64,11 +66,24 @@ def get_search(request):
                     return render(
                         request,
                         "encyclopedia/search.html",
-                        {"results": matches, "form": search},
+                        {"results": matches, "form": form},
                     )
 
     # Invalid request, loads index.
     return index(request)
 
+
 def new(request):
-    return render(request, "encyclopedia/new_page.html")
+    if request.method == "GET":
+        cform = forms.newpageform()
+        return render(
+            request,
+            "encyclopedia/new_page.html",
+            {"cform": cform, "form": form},
+        )
+    else:
+        return render(
+            request,
+            "encyclopedia/new_page.html",
+            {"cform": cform, "form": form},
+        )
