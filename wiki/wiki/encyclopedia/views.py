@@ -107,28 +107,28 @@ def new(request):
     )
 
 
-def edit(request):
-    title = request.POST.get("edit")
-    eform = forms.editpageform(initial={'title':title, 'body':util.get_entry(title)})
+# def edit(request):
+#     title = request.POST.get("edit")
+#     eform = forms.editpageform(initial={'title':title, 'body':util.get_entry(title)})
 
-    return render(request, "encyclopedia/edit_page.html",{
-            "title": title,
-            "form":form,
-            "eform":eform})
+#     return render(request, "encyclopedia/edit_page.html",{
+#             "title": title,
+#             "form":form,
+#             "eform":eform})
 
 
-def save(request):
-    eform = forms.editpageform(request.POST)
+# def save(request):
+#     eform = forms.editpageform(request.POST)
 
-    if eform.is_valid():
-        title = eform.cleaned_data["title"]
-        content = eform.cleaned_data["body"]
+#     if eform.is_valid():
+#         title = eform.cleaned_data["title"]
+#         content = eform.cleaned_data["body"]
         
-        util.save_entry(title, content)
-        return page(request, title)
+#         util.save_entry(title, content)
+#         return page(request, title)
 
-    else:
-        return render (request, "encyclopedia/edit_page.html",{
-                "form":form,
-                "eform":eform            
-        })
+#     else:
+#         return render (request, "encyclopedia/edit_page.html",{
+#                 "form":form,
+#                 "eform":eform            
+#         })
