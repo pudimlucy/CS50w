@@ -74,17 +74,27 @@ def get_search(request):
 
 
 def new(request):
-    if request.method == 'GET':
-        cform = forms.newpageform()
-        return render(
-            request,
-            "encyclopedia/new_page.html",
-            {"cform": cform, "form": form},
-        )
+    if request.method == "POST":
+        cform = forms.newpageform(request.POST)
+        if cform.is_valid():
+
+            title = cform.cleaned_data["title"]
+            body = cform.cleaned_data["body"]
+
+            if util.get_entry(title) != None:
+                cform = forms.NewPageForm()
+                return render(
+                    request,
+                    "encyclopedia/new_page.html",
+                    {"form": form, "cform": cform, "error": True},
+                )
+
+            util.save_entry(title, body)
+            return page(request, title)
     else:
         cform = forms.newpageform()
-        return render(
-            request,
-            "encyclopedia/new_page.html",
-            {"cform": cform, "form": form},
-        )
+    return render(
+        request,
+        "encyclopedia/new_page.html",
+        {"cform": cform, "form": form, "error": False},
+    )

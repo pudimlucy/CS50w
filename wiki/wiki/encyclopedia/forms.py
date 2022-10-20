@@ -10,7 +10,7 @@ class searchform(forms.Form):
 
 
 class newpageform(forms.Form):
-    pagename = forms.CharField(
+    title = forms.CharField(
         label="Title",
         required=True,
         widget=forms.TextInput(

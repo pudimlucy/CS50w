@@ -6,6 +6,11 @@
 
 {% block body %}
     <h1>New Page</h1>
+    {% if {{error}} %}
+    <div class="alert alert-warning" role="alert">
+        <h4>There already is a page with that title! Try again!</h4>
+    </div>
+    {% endif %}
     <div>
         <form action="{% url 'new'%}" method="POST">
             {% csrf_token %}                     
