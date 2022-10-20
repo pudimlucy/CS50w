@@ -7,10 +7,10 @@
 {% block body %}
     <h1>Edit Page</h1>
     <div>
-        <form action="{% url 'edit'%}" method="POST">
+        <form action="{% url 'save'%}" method="POST">
             {% csrf_token %}                     
             {{eform}}         
-            <input id="edit" type="submit" value="edit">
+            <input id="save" type="submit" value="save">
         </form> 
     </div>
 {% endblock %}
