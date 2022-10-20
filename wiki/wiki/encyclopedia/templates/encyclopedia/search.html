@@ -13,7 +13,7 @@
     
     {% for result in results %}
       <li>
-        <a href= "{% url 'page' page=result %}">{{result}}</a>
+        <a href= "{% url 'title' title=result %}">{{result}}</a>
       </li>
     {% endfor %}
 </ul>
