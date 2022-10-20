@@ -124,29 +124,29 @@ def edit(request):
     Loads page for editing entries and saves alterations to memory.
     """
     title = request.POST.get("edit")
-    eform = forms.editpageform(initial={"title": title, "body": util.get_entry(title)})
-    
-    return render(
-        request,
-        "encyclopedia/edit_page.html",
-        {"title": title, "form": form, "eform": eform},
-    )
 
+    if request.method == 'GET':
+        eform = forms.editpageform(initial={"title": title, "body": util.get_entry(title)})
 
-def save(request):
-    eform = forms.editpageform(request.POST)
-
-    if eform.is_valid():
-        title = eform.cleaned_data["title"]
-        content = eform.cleaned_data["body"]
-
-        util.save_entry(title, content)
-        return page(request, title)
-
-    else:
         return render(
-            request, "encyclopedia/edit_page.html", {"form": form, "eform": eform}
+            request,
+            "encyclopedia/edit_page.html",
+            {"title": title, "form": form, "eform": eform},
         )
+    else:
+        eform = forms.editpageform(request.POST)
+
+        if eform.is_valid():
+            title = eform.cleaned_data["title"]
+            content = eform.cleaned_data["body"]
+
+            util.save_entry(title, content)
+            return page(request, title)
+
+        else:
+            return render(
+                request, "encyclopedia/edit_page.html", {"form": form, "eform": eform}
+            )
 
 def random(request):
     return page(request, choice(util.list_entries()))

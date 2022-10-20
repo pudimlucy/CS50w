@@ -4,7 +4,7 @@
 {% endblock %}
 
 {% block body %}
-    <form action="{% url 'edit'  %}" method = "POST">
+    <form action="{% url 'edit'  %}" method = "GET">
         {% csrf_token %}
         <button type="submit" name="edit" value="{{title}}" id="edit">Edit</button>
         <h1>{{title}}</h1>
