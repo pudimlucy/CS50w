@@ -14,7 +14,7 @@ def index(request):
     return render(
         request,
         "encyclopedia/index.html",
-        {"entries": entries, "form": form, "title": "test"},
+        {"entries": entries, "form": form},
     )
 
 
