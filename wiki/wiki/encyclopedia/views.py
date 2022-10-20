@@ -10,7 +10,9 @@ markdowner = Markdown()
 
 
 def index(request):
-
+    """
+    Loads main page, listing all current entries.
+    """
     entries = util.list_entries()
     return render(
         request,
@@ -20,6 +22,9 @@ def index(request):
 
 
 def page(request, title):
+    """
+    Loads entry on wiki/[title]
+    """
     page = util.get_entry(title)
 
     if not page:
@@ -41,6 +46,9 @@ def page(request, title):
 
 
 def get_search(request):
+    """
+    Gets user's search request and loads results.
+    """
     searchform = forms.searchform(request.GET)
 
     if request.method == "GET":
@@ -82,6 +90,9 @@ def get_search(request):
 
 
 def new(request):
+    """
+    Loads page for entry creation and saves entries on memory.
+    """
     if request.method == "POST":
         cform = forms.newpageform(request.POST)
         if cform.is_valid():
@@ -109,30 +120,40 @@ def new(request):
 
 
 def edit(request):
+    """
+    Loads page for editing entries and saves alterations to memory.
+    """
+
+    # gets page title on request
     title = request.POST.get("edit")
-    eform = forms.editpageform(initial={"title": title, "body": util.get_entry(title)})
-
-    return render(
-        request,
-        "encyclopedia/edit_page.html",
-        {"title": title, "form": form, "eform": eform},
-    )
-
-
-def save(request):
-    eform = forms.editpageform(request.POST)
-
-    if eform.is_valid():
-        title = eform.cleaned_data["title"]
-        content = eform.cleaned_data["body"]
-
-        util.save_entry(title, content)
-        return page(request, title)
-
-    else:
+    
+    # loads /edit on GET request, loading entry's current data with initial parameter
+    if request.method == 'GET':
+        eform = forms.editpageform(initial={"title": title, "body": util.get_entry(title)})
         return render(
-            request, "encyclopedia/edit_page.html", {"form": form, "eform": eform}
+            request,
+            "encyclopedia/edit_page.html",
+            {"title": title, "form": form, "eform": eform},
         )
+    
+    # gets user's alterations to edit and saves to memory
+    else:
+        eform = forms.editpageform(request.POST)
+
+        if eform.is_valid():
+            title = eform.cleaned_data["title"]
+            content = eform.cleaned_data["body"]
+
+            util.save_entry(title, content)
+            return page(request, title)
+
+        else:
+            return render(
+                request, "encyclopedia/edit_page.html", {"form": form, "eform": eform}
+            )
 
 def random(request):
+    """
+    Loads random entry page.
+    """
     return page(request, choice(util.list_entries()))

@@ -2,6 +2,9 @@ from django import forms
 
 
 class searchform(forms.Form):
+    """
+    Form model for search bar
+    """
     search = forms.CharField(
         label="Search",
         required=False,
@@ -10,6 +13,9 @@ class searchform(forms.Form):
 
 
 class newpageform(forms.Form):
+    """
+    Form model for creation of new entry
+    """
     title = forms.CharField(
         label="Title",
         required=True,
@@ -28,6 +34,9 @@ class newpageform(forms.Form):
 
 
 class editpageform(forms.Form):
+    """
+    Form model for editing of entry
+    """
     title = forms.CharField(
         label="Title",
         disabled=False,
