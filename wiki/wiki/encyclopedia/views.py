@@ -108,10 +108,10 @@ def new(request):
 
 def edit(request):
 
+    title = request.POST.get("edit")
     eform = forms.editpageform(initial={"title": title, "body": util.get_entry(title)})
 
-    if request.method == "POST":
-        title = request.POST.get("edit")
+    if request.method == "POST":       
         eform = forms.editpageform(request.POST)
 
         if eform.is_valid():
@@ -122,11 +122,12 @@ def edit(request):
             return page(request, title)
         else:
             return render(
+                request,
+                "encyclopedia/error.html",
+                {"error": f"Error 500: Unexpected Error, try again"},
+            )
+
+    else:
+            return render(
                 request, "encyclopedia/edit_page.html", {"form": form, "eform": eform}
             )
-    else:
-        return render(
-            request,
-            "encyclopedia/error.html",
-            {"error": f"Error 500: Unexpected Error, try again"},
-        )
