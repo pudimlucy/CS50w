@@ -123,9 +123,9 @@ def edit(request):
     """
     Loads page for editing entries and saves alterations to memory.
     """
-    title = request.POST.get("edit")
 
     if request.method == 'GET':
+        title = request.GET.get("edit")
         eform = forms.editpageform(initial={"title": title, "body": util.get_entry(title)})
 
         return render(
@@ -134,6 +134,7 @@ def edit(request):
             {"title": title, "form": form, "eform": eform},
         )
     else:
+        title = request.POST.get("edit")
         eform = forms.editpageform(request.POST)
 
         if eform.is_valid():
