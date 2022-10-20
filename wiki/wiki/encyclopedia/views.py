@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from markdown2 import Markdown
+from random import choice
 
 from . import util, forms
 
@@ -132,3 +133,6 @@ def save(request):
         return render(
             request, "encyclopedia/edit_page.html", {"form": form, "eform": eform}
         )
+
+def random(request):
+    return page(request, choice(util.list_entries()))
