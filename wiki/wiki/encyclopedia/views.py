@@ -74,7 +74,7 @@ def get_search(request):
 
 
 def new(request):
-    if request.method == "GET":
+    if request.method == 'GET':
         cform = forms.newpageform()
         return render(
             request,
