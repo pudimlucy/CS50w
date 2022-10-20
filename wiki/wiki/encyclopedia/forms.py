@@ -39,9 +39,8 @@ class editpageform(forms.Form):
     """
     title = forms.CharField(
         label="Title",
-        disabled=False,
         required=False,
-        widget=forms.HiddenInput(
+        widget=forms.TextInput(
             attrs={
                 "class": "col-sm-12",
             }
