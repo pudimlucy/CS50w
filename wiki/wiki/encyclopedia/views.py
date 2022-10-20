@@ -21,10 +21,11 @@ def page(request, title):
     page = util.get_entry(title)
 
     if not page:
-        return render(request, "encyclopedia/error.html",
-        {
-            "error": f"Error 404: page {title} not found"
-        })
+        return render(
+            request,
+            "encyclopedia/error.html",
+            {"error": f"Error 404: page {title} not found"},
+        )
     else:
         return render(
             request,
@@ -104,18 +105,28 @@ def new(request):
         {"cform": cform, "form": form, "error": False},
     )
 
-def edit(request):
-    title = request.POST.get("edit")
-    eform = forms.editpageform(initial = {'title': title, 'body':util.get_entry(title)})
 
-    if eform.is_valid():
-        return render (request, "encyclopedia/edit_page.html",{
-                "title":title,
-                "form":form,
-                "eform":eform
-            })
+def edit(request):
+
+    eform = forms.editpageform(initial={"title": title, "body": util.get_entry(title)})
+
+    if request.method == "POST":
+        title = request.POST.get("edit")
+        eform = forms.editpageform(request.POST)
+
+        if eform.is_valid():
+            title = eform.cleaned_data["title"]
+            content = eform.cleaned_data["body"]
+
+            util.save_entry(title, content)
+            return page(request, title)
+        else:
+            return render(
+                request, "encyclopedia/edit_page.html", {"form": form, "eform": eform}
+            )
     else:
-        return render (request, "encyclopedia/error.html",
-        {
-            "error": f"Error 500: Unexpected Error, try again"
-        })
+        return render(
+            request,
+            "encyclopedia/error.html",
+            {"error": f"Error 500: Unexpected Error, try again"},
+        )

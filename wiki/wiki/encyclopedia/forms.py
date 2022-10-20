@@ -26,9 +26,21 @@ class newpageform(forms.Form):
         ),
     )
 
+
 class editpageform(forms.Form):
-    title = forms.CharField(label="Title", disabled=False, required=False,
-    widget= forms.HiddenInput(attrs={'class':'col-sm-12',}))
-   
-    body = forms.CharField(label="Content",
-    widget= forms.Textarea(attrs={'class':'col-sm-11'}))
+    title = forms.CharField(
+        label="Title",
+        disabled=False,
+        required=False,
+        widget=forms.HiddenInput(
+            attrs={
+                "class": "col-sm-12",
+            }
+        ),
+    )
+
+    body = forms.CharField(
+        label="Content",
+        required=False,
+        widget=forms.Textarea(attrs={"class": "col-sm-11"}),
+    )
