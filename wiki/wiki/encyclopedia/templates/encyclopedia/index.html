@@ -11,7 +11,7 @@
         {% for entry in entries %}
             {% if not entry %}
             {% else %}
-                <a href="{% url 'title' title=entry %}">{{ entry }}</a>
+                <li><a href="{% url 'title' title=entry %}">{{ entry }}</a></li>
             {% endif %}
         {% endfor %}
     </ul>
