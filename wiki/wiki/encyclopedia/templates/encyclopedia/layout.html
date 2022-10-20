@@ -12,20 +12,20 @@
         <div class="row">
             <div class="sidebar col-lg-2 col-md-3">
                 <h2>Wiki</h2>
-                <div class="row">
-                    <div class="sidebar col-lg-3 col-md-3">
-                        <form action="{% url 'search' %}" method="GET" class="search">
-                            {{form}}
-                            <input  id ="search" type="submit" value="search">     
-                        </form>        
-                    </div>
-                        <a href="{% url 'index' %}">Home</a>
-                    <div>
-                        <a href="{% url 'new' %}">Create New Page</a>
-                    </div>
-                    <div>
-                        Random Page
-                    </div>
+                <div>
+                    <form action="{% url 'search' %}" method="GET" class="search">
+                        {{form}}
+                        <input  id ="search" type="submit" value="search">     
+                    </form> 
+                </div>      
+                <div>
+                    <a href="{% url 'index' %}">Home</a>
+                </div>
+                <div>
+                    <a href="{% url 'new' %}">Create New Page</a>
+                </div>
+                <div>
+                    Random Page
                 </div>
                 {% block nav %}
                 {% endblock %}
