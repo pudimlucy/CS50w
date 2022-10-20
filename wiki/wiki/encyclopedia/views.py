@@ -4,8 +4,13 @@ from . import util, forms
 
 form = forms.searchform()
 
+
 def index(request):
-    return render(request, "encyclopedia/index.html", {"entries": util.list_entries(), "form":form})
+    return render(
+        request,
+        "encyclopedia/index.html",
+        {"entries": util.list_entries(), "form": form},
+    )
 
 
 def page(request, title):
@@ -20,7 +25,7 @@ def page(request, title):
             {
                 "title": title,
                 "content": page,
-                "form":form,
+                "form": form,
             },
         )
 
@@ -40,10 +45,11 @@ def get_search(request):
             if len(matches) == 0:
                 # no matches found, loads 404 error
                 # TODO: display search.html with error message
-                return render(request,"encyclopedia/search.html",{
-                    'error':"No results found",
-                    "form":search
-                })
+                return render(
+                    request,
+                    "encyclopedia/search.html",
+                    {"error": "No results found", "form": search},
+                )
             elif len(matches) == 1 and matches[0].lower == search:
                 # one exact match found, loads wiki/[title]
                 match = matches[0]
@@ -55,11 +61,11 @@ def get_search(request):
                 if len(title) > 0:
                     return page(request, title[0])
                 else:
-                    return render(request,"encyclopedia/search.html",{
-                        'results':matches,
-                        "form":search
-
-                    })
+                    return render(
+                        request,
+                        "encyclopedia/search.html",
+                        {"results": matches, "form": search},
+                    )
 
     # Invalid request, loads index.
     return index(request)
