@@ -82,7 +82,7 @@ def new(request):
             body = cform.cleaned_data["body"]
 
             if util.get_entry(title) != None:
-                cform = forms.NewPageForm()
+                cform = forms.newpageform()
                 return render(
                     request,
                     "encyclopedia/new_page.html",
