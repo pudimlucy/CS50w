@@ -82,6 +82,7 @@ def new(request):
             {"cform": cform, "form": form},
         )
     else:
+        cform = forms.newpageform()
         return render(
             request,
             "encyclopedia/new_page.html",
