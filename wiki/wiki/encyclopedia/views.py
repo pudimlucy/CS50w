@@ -1,9 +1,11 @@
 from django.shortcuts import render
+from markdown2 import Markdown
 
 from . import util, forms
 
 
 form = forms.searchform()
+markdowner = Markdown()
 
 
 def index(request):
@@ -26,7 +28,7 @@ def page(request, title):
             "encyclopedia/entry.html",
             {
                 "title": title,
-                "content": page,
+                "content": markdowner.convert(page),
                 "form": form,
             },
         )
