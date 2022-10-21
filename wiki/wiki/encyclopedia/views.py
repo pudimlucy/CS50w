@@ -91,10 +91,10 @@ def get_search(request):
         # form not valid, renders error
         else:
             return render(
-            request,
-            "encyclopedia/error.html",
-            {"error": f"Error 105: Invalid Form Data"},
-        )
+                request,
+                "encyclopedia/error.html",
+                {"error": f"Error 105: Invalid Form Data"},
+            )
 
     # invalid request, redirects to main page.
     return index(request)
@@ -121,20 +121,19 @@ def new(request):
                     "encyclopedia/new_page.html",
                     {"form": form, "cform": cform, "error": True},
                 )
-            
+
             # saves entry into memory and redirects to wiki/[title] on new entry.
             util.save_entry(title, body)
             return page(request, title)
-        
+
         # form not valid, renders error
         else:
             return render(
-            request,
-            "encyclopedia/error.html",
-            {"error": f"Error 105: Invalid Form Data"},
-        )
-            
-    
+                request,
+                "encyclopedia/error.html",
+                {"error": f"Error 105: Invalid Form Data"},
+            )
+
     # renders /new
     else:
         cform = forms.newpageform()
@@ -142,7 +141,7 @@ def new(request):
             request,
             "encyclopedia/new_page.html",
             {"cform": cform, "form": form, "error": False},
-    )
+        )
 
 
 def edit(request):
@@ -151,9 +150,11 @@ def edit(request):
     """
 
     # gets entry data
-    if request.method == 'GET':
+    if request.method == "GET":
         title = request.GET.get("edit")
-        eform = forms.editpageform(initial={"title": title, "body": util.get_entry(title)})
+        eform = forms.editpageform(
+            initial={"title": title, "body": util.get_entry(title)}
+        )
 
         # renders /edit
         return render(
@@ -161,7 +162,7 @@ def edit(request):
             "encyclopedia/edit_page.html",
             {"title": title, "form": form, "eform": eform},
         )
-    
+
     # gets entry data
     else:
         title = request.POST.get("edit")
@@ -179,10 +180,14 @@ def edit(request):
         # form not valid, renders error
         else:
             return render(
-            request,
-            "encyclopedia/error.html",
-            {"error": f"Error 105: Invalid Form Data"},
-        )
+                request,
+                "encyclopedia/error.html",
+                {"error": f"Error 105: Invalid Form Data"},
+            )
+
 
 def random(request):
+    """
+    Loads random entry page.
+    """
     return page(request, choice(util.list_entries()))

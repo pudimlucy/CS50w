@@ -5,6 +5,7 @@ class searchform(forms.Form):
     """
     Form model for search bar
     """
+
     search = forms.CharField(
         label="Search",
         required=False,
@@ -16,6 +17,7 @@ class newpageform(forms.Form):
     """
     Form model for creation of new entry
     """
+
     title = forms.CharField(
         label="Title",
         required=True,
@@ -37,11 +39,8 @@ class editpageform(forms.Form):
     """
     Form model for editing of entry
     """
-    title = forms.CharField(
-        label="Title",
-        required=False,
-        widget=forms.HiddenInput()
-    )
+
+    title = forms.CharField(label="Title", required=False, widget=forms.HiddenInput())
 
     body = forms.CharField(
         label="Content",
