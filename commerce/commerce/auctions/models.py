@@ -21,7 +21,7 @@ class User(AbstractUser):
 
 
 class Listings(models.Model):
-    """ "Model for product Listings"""
+    """Model for product listing on Auditions"""
 
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     CATEGORIES = (
@@ -66,7 +66,7 @@ class Listings(models.Model):
 
 
 class Bids(models.Model):
-    """ "Model for Bids on Listings"""
+    """Model for Bids on Auditions"""
 
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     auction_id = models.ForeignKey(Listings, on_delete=models.CASCADE)
@@ -80,7 +80,7 @@ class Bids(models.Model):
 
 
 class Comments(models.Model):
-    """ "Model for Comments on Listings"""
+    """Model for Comments on Auditions"""
 
     listing_id = models.ForeignKey(Listings, on_delete=models.CASCADE)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -89,7 +89,7 @@ class Comments(models.Model):
 
 
 class Watches(models.Model):
-    """ "Model for Watches on Listings"""
+    """Model for Watches on Auditions"""
 
     listing_id = models.ForeignKey(Listings, on_delete=models.CASCADE)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
