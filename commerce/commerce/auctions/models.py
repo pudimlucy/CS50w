@@ -62,7 +62,6 @@ class Listings(models.Model):
     )
     quantity, number_of_bids, bidders, watchers = models.IntegerField()
     start_date = models.DateField(auto_now_add=True, blank=True)
-    end_date = models.DateField()
 
 
 class Bids(models.Model):
