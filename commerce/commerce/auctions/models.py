@@ -13,6 +13,7 @@ from djmoney.models.fields import MoneyField
 
 class User(AbstractUser):
     """Custom User model - inherited from Django implementation"""
+
     balance = MoneyField(
         decimal_places=4,
         max_digits=19,

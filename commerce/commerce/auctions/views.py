@@ -9,6 +9,7 @@ from . import forms
 
 nuform = forms.CustomRegisterForm()
 
+
 def index(request):
     return render(request, "auctions/index.html")
 
@@ -26,9 +27,11 @@ def login_view(request):
             login(request, user)
             return HttpResponseRedirect(reverse("index"))
         else:
-            return render(request, "auctions/login.html", {
-                "message": "Invalid username and/or password."
-            })
+            return render(
+                request,
+                "auctions/login.html",
+                {"message": "Invalid username and/or password."},
+            )
     else:
         return render(request, "auctions/login.html")
 
@@ -45,11 +48,15 @@ def register(request):
         password = request.POST["password1"]
         confirmation = request.POST["password2"]
         if password != confirmation:
-            return render(request, "auctions/register.html", {
-                "message": "Passwords must match."
-            })
+            return render(
+                request,
+                "auctions/register.html",
+                {
+                    "message": "Passwords must match.",
+                    "nuform": nuform,
+                },
+            )
 
-        
         # Attempt to create new user
         username = request.POST["username"]
         email = request.POST["email"]
@@ -59,16 +66,36 @@ def register(request):
         country = request.POST["country"]
         postcode = request.POST["postcode"]
         try:
-            user = User.objects.create_user(username=username, email=email, password=password, cellphone=cellphone, address=address, town=town, country=country, postcode=postcode)
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                cellphone=cellphone,
+                address=address,
+                town=town,
+                country=country,
+                postcode=postcode,
+            )
             user.save()
         except IntegrityError:
-            return render(request, "auctions/register.html", {
-                "message": "Username already taken."
-            })
+            return render(
+                request,
+                "auctions/register.html",
+                {
+                    "message": "Username already taken.",
+                    "nuform": nuform,
+                },
+            )
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
     else:
-        return render(request, "auctions/register.html")
+        return render(
+            request,
+            "auctions/register.html",
+            {
+                "nuform": nuform,
+            },
+        )
 
 
 def new_listing(request):
