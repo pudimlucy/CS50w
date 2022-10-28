@@ -1,7 +1,14 @@
+from email.policy import default
+from unicodedata import name
+from attr import attrs
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 
 from .models import User
+
+# Django app that adds support for Money fields, access on https://github.com/django-money
+from djmoney.forms.widgets import MoneyWidget
+from djmoney.forms.fields import MoneyField
 
 
 class CustomRegisterForm(UserCreationForm):
@@ -77,11 +84,117 @@ class CustomRegisterForm(UserCreationForm):
         fields = [
             "username",
             "email",
-            "password1",
-            "password2",
             "cellphone",
             "address",
             "town",
             "country",
             "postcode",
+            "password1",
+            "password2",
         ]
+
+
+class NewListForm(forms.Form):
+    item_title = forms.CharField(
+        label="title",
+        required=True,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "type": "text",
+                "name": "item_title",
+                "placeholder": "Item title...",
+            }
+        ),
+    )
+
+    category = forms.ChoiceField(
+        label="category",
+        required=False,
+        choices=(
+            ("ETC", "Everything Else"),
+            ("ANQ", "Antiques"),
+            ("ART", "Art"),
+            ("BBY", "Baby"),
+            ("BKS", "Books"),
+            ("BUS", "Bussiness & Industrial"),
+            ("CAM", "Cameras & Photo"),
+            ("CLP", "Cellphones"),
+            ("CLT", "Clothing"),
+            ("COL", "Collectibles"),
+            ("CPT", "Computers"),
+            ("CRL", "Consumer Eletronics"),
+            ("CRT", "Crafts"),
+            ("DOL", "Dolls & Bears"),
+            ("DVD", "DVDs and Movies"),
+            ("HLT", "Health & Beauty"),
+            ("HOM", "Home & Garden"),
+            ("JWL", "Jewerly & Watches"),
+            ("MSC", "Music"),
+            ("PET", "Pet Supplies"),
+            ("PTR", "Pottery & Glasses"),
+            ("RLS", "Real State"),
+            ("SPC", "Speciality Services"),
+            ("SPT", "Sporting Goods"),
+            ("TOY", "Toys & Hobbies"),
+            ("VDG", "Video Games & Consoles"),
+        ),
+        widget=forms.Select(
+            attrs={
+                "class": "form-control",
+                "type": "text",
+                "name": "category",
+            }
+        ),
+    )
+
+    image_link = forms.CharField(
+        label="Image Link",
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "type": "text",
+                "name": "image_link",
+                "placeholder": "Image link...",
+            }
+        ),
+    )
+
+    start_price = forms.DecimalField(
+        label="Starting Price",
+        required=True,
+        decimal_places=2,
+        min_value=0,
+        widget=MoneyWidget(
+            default_currency="USD",
+            attrs={
+                "class": "form-control",
+                "type": "number",
+                "min": "0",
+                "step": "0.01",
+                "name": "starting_price",
+            },
+        ),
+    )
+
+    quantity = forms.IntegerField(
+        label="quantity",
+        required=True,
+        min_value=1,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "type": "number",
+                "name": "quantity",
+                "min": "1",
+                "placeholder": "Quantity Available...",
+            }
+        ),
+    )
+
+    description = forms.CharField(
+        label="Description",
+        required=True,
+        widget=forms.Textarea(attrs={"class": "col-sm-11", "name": "description"}),
+    )

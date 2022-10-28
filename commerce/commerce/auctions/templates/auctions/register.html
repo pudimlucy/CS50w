@@ -2,16 +2,22 @@
 
 {% block body %}
 
-    <h2>Register</h2>
+    <div class="container">
+        <h2>Register</h2>
+    </div>
 
     {% if message %}
         <div>{{ message }}</div>
     {% endif %}
 
-    <form action="{% url 'register' %}" method="post">
+    <form action="{% url 'register' %}" method="POST">
         {% csrf_token %}
-        {{nuform}}
-        <input class="btn btn-primary" type="submit" value="Register">
+        <div class="container">
+            {{nuform}}
+        </div>
+        <div class="container">
+            <input class="btn btn-primary" type="submit" value="Register">
+        </div> 
     </form>
 
     Already have an account? <a href="{% url 'login' %}">Log In here.</a>

@@ -1,3 +1,4 @@
+from email.policy import default
 from re import U
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -32,38 +33,12 @@ class Listings(models.Model):
     """Model for product listing on Auditions"""
 
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    CATEGORIES = (
-        ("ANQ", "Antiques"),
-        ("ART", "Art"),
-        ("BBY", "Baby"),
-        ("BKS", "Books"),
-        ("BUS", "Bussiness & Industrial"),
-        ("CAM", "Cameras & Photo"),
-        ("CLP", "Cellphones"),
-        ("CLT", "Clothing"),
-        ("COL", "Collectibles"),
-        ("CPT", "Computers"),
-        ("CRL", "Consumer Eletronics"),
-        ("CRT", "Crafts"),
-        ("DOL", "Dolls & Bears"),
-        ("DVD", "DVDs and Movies"),
-        ("HLT", "Health & Beauty"),
-        ("HOM", "Home & Garden"),
-        ("JWL", "Jewerly & Watches"),
-        ("MSC", "Music"),
-        ("PET", "Pet Supplies"),
-        ("PTR", "Pottery & Glasses"),
-        ("RLS", "Real State"),
-        ("SPC", "Speciality Services"),
-        ("SPT", "Sporting Goods"),
-        ("TOY", "Toys & Hobbies"),
-        ("VDG", "Video Games & Consoles"),
-        ("ETC", "Everything Else"),
-    )
     item_title = models.CharField(max_length=250)
-    image_link = models.CharField(max_length=250)
+    category = models.CharField(max_length=250, default=("ETC", "Everything Else"))
+    image_link = models.CharField(max_length=250, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
     start_price = MoneyField(
-        decimal_places=4,
+        decimal_places=2,
         max_digits=19,
         default=0,
         default_currency="USD",
