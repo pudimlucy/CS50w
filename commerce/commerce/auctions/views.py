@@ -5,7 +5,9 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from .models import User
+from . import forms
 
+nuform = forms.CustomRegisterForm()
 
 def index(request):
     return render(request, "auctions/index.html")
@@ -24,11 +26,9 @@ def login_view(request):
             login(request, user)
             return HttpResponseRedirect(reverse("index"))
         else:
-            return render(
-                request,
-                "auctions/login.html",
-                {"message": "Invalid username and/or password."},
-            )
+            return render(request, "auctions/login.html", {
+                "message": "Invalid username and/or password."
+            })
     else:
         return render(request, "auctions/login.html")
 
@@ -40,27 +40,31 @@ def logout_view(request):
 
 def register(request):
     if request.method == "POST":
-        username = request.POST["username"]
-        email = request.POST["email"]
 
         # Ensure password matches confirmation
-        password = request.POST["password"]
-        confirmation = request.POST["confirmation"]
+        password = request.POST["password1"]
+        confirmation = request.POST["password2"]
         if password != confirmation:
-            return render(
-                request, "auctions/register.html", {"message": "Passwords must match."}
-            )
+            return render(request, "auctions/register.html", {
+                "message": "Passwords must match."
+            })
 
+        
         # Attempt to create new user
+        username = request.POST["username"]
+        email = request.POST["email"]
+        cellphone = request.POST["cellphone"]
+        address = request.POST["address"]
+        town = request.POST["town"]
+        country = request.POST["country"]
+        postcode = request.POST["postcode"]
         try:
-            user = User.objects.create_user(username, email, password)
+            user = User.objects.create_user(username=username, email=email, password=password, cellphone=cellphone, address=address, town=town, country=country, postcode=postcode)
             user.save()
         except IntegrityError:
-            return render(
-                request,
-                "auctions/register.html",
-                {"message": "Username already taken."},
-            )
+            return render(request, "auctions/register.html", {
+                "message": "Username already taken."
+            })
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
     else:

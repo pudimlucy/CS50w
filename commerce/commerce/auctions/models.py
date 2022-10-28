@@ -1,3 +1,8 @@
+from re import U
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+
+
 from django.contrib.auth.models import AbstractUser
 from django.forms import DateTimeField
 from django.db import models
@@ -6,9 +11,8 @@ from django.db import models
 from djmoney.models.fields import MoneyField
 
 
-class User(AbstractUser, models.Model):
-    """Custom User Model for auditions app."""
-
+class User(AbstractUser):
+    """Custom User model - inherited from Django implementation"""
     balance = MoneyField(
         decimal_places=4,
         max_digits=19,
