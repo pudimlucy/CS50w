@@ -6,7 +6,7 @@ from django.db import models
 from djmoney.models.fields import MoneyField
 
 
-class User(AbstractUser):
+class User(AbstractUser, models.Model):
     """Custom User Model for auditions app."""
 
     balance = MoneyField(
@@ -16,7 +16,10 @@ class User(AbstractUser):
         default_currency="USD",
     )
     cellphone = models.CharField(max_length=14)
-    address, town, country, postcode = models.CharField(max_length=255)
+    address = models.CharField(max_length=255)
+    town = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+    postcode = models.CharField(max_length=255)
     pass
 
 
@@ -52,15 +55,24 @@ class Listings(models.Model):
         ("VDG", "Video Games & Consoles"),
         ("ETC", "Everything Else"),
     )
-    item_title = models.CharField(max_lenght=64)
-    image_link = models.CharField(max_lenght=250)
-    start_price, current_price = MoneyField(
+    item_title = models.CharField(max_length=250)
+    image_link = models.CharField(max_length=250)
+    start_price = MoneyField(
         decimal_places=4,
         max_digits=19,
         default=0,
         default_currency="USD",
     )
-    quantity, number_of_bids, bidders, watchers = models.IntegerField()
+    current_price = MoneyField(
+        decimal_places=4,
+        max_digits=19,
+        default=0,
+        default_currency="USD",
+    )
+    quantity = models.IntegerField()
+    number_of_bids = models.IntegerField()
+    bidders = models.IntegerField()
+    watchers = models.IntegerField()
     start_date = models.DateField(auto_now_add=True, blank=True)
 
 
