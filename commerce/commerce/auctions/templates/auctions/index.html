@@ -2,8 +2,14 @@
 
 {% block body %}
     <h2>Active Listings</h2>
+
+    {% if message %}
+        {{message}}
+    {% endif %}
+
     {% for listing in listings %}
         <div class="container">
+            <a href="{% url 'listing_page' item_id=listing.id %}">
             {% if listing.image_link %}
                 <div class="container">
                     <img src="{{ listing.image_link }}" alt="{{ listing.item_title }} image">

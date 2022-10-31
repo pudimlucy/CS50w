@@ -13,11 +13,9 @@ from . import forms
 
 def index(request):
     # Get all listings descending
-    listings = Listings.objects.filter(closed=False).order_by("-start_date")
+    listings = Listings.objects.filter(closed=False).order_by("start_date")
 
-    return render(request, "auctions/index.html", {
-        "listings": listings
-    })
+    return render(request, "auctions/index.html", {"listings": listings})
 
 
 def login_view(request):
@@ -170,3 +168,14 @@ def new_listing(request):
         return render(
             request, "auctions/new_listing.html", {"nlform": forms.NewListForm()}
         )
+
+
+@login_required(login_url="login")
+def listing_page(request, item_id):
+    try:
+        listing = Listings.objects.get(pk=item_id)
+    except Listings.DoesNotExist:
+        return render(
+            request, "auctions/index.html", {"message": "Auction doesn't exist."}
+        )
+    return render(request, "auctions/listing_page.html", {"listing": listing})

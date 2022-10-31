@@ -1,0 +1,26 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>{{listing.item_title}}</h2>
+    {% if listing.image_link %}
+        <img src="{{ listing.image_link }}" alt="{{ listing.item_title }} image">
+    {% endif %}
+    <div class="container">
+        Quantity available: {{listing.quantity}}
+        Bids Made: {{listing.numbers_of_bids}}
+        Bidders: {{listing.bidders}}
+        fuckers watching: {{listing.watchers}}
+        Date Start: {{listing.start_date}}
+        Seller: TODO
+        Category: {{listing.category}}
+        Starting Date: {{listing.start_date}}
+        Closed Date: TODO
+        Current Price: {{listing.current_price}}
+    </div>
+    {% comment %} TODO: Watchlist {% endcomment %}
+    {% comment %} TODO: Bid {% endcomment %}
+    {% comment %} TODO: Close {% endcomment %}
+    {% comment %} TODO: Watchlist {% endcomment %}
+    {% comment %} TODO: Display Winner {% endcomment %}
+    {% comment %} TODO: Comments {% endcomment %}
+{% endblock %}

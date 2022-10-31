@@ -8,7 +8,6 @@ from django.contrib.auth.models import AbstractUser
 from django.forms import DateTimeField, DecimalField
 from django.db import models
 
-
 class User(AbstractUser):
     """Custom User model - inherited from Django implementation"""
 
