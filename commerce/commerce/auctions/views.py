@@ -60,6 +60,8 @@ def register(request):
 
         # Attempt to create new user
         username = request.POST["username"]
+        first_name = request.POST["first_name"]
+        last_name = request.POST["last_name"]
         email = request.POST["email"]
         cellphone = request.POST["cellphone"]
         address = request.POST["address"]
@@ -69,6 +71,8 @@ def register(request):
         try:
             user = User.objects.create_user(
                 username=username,
+                first_name=first_name,
+                last_name=last_name,
                 email=email,
                 password=password,
                 cellphone=cellphone,
@@ -102,9 +106,9 @@ def register(request):
 @login_required(login_url="login")
 def new_listing(request):
 
-    nlform = forms.NewListForm()
-
     if request.method == "POST":
+        nlform = forms.NewListForm(request.POST)
+        
         if nlform.is_valid():
             user_id = User.objects.get(id=request.user.id)
             item_title = request.POST["item-title"]
@@ -114,27 +118,40 @@ def new_listing(request):
             quantity = request.POST["quantity"]
             description = request.POST["description"]
 
-            listing = forms.NewListForm(
-                user_id=user_id,
-                item_title=item_title,
-                category=category,
-                image_link=image_link,
-                current_price=current_price,
-                starting_price=starting_price,
-                quantity=quantity,
-                description=description,
-                number_of_bids=0,
-                bidders=0,
-                watchers=0,
-            )
-            listing.save()
-            # TODO: load listing's page
-            render(request, "auctions/index.html")
+            try:
+                listing = forms.NewListForm(
+                    user_id=user_id,
+                    item_title=item_title,
+                    category=category,
+                    image_link=image_link,
+                    current_price=current_price,
+                    starting_price=starting_price,
+                    quantity=quantity,
+                    description=description,
+                    number_of_bids=0,
+                    bidders=0,
+                    watchers=0,
+                )
+                listing.save()
+            except IntegrityError:
+                return render(
+                    request,
+                    "auctions/new_listing.html",
+                    {
+                        "message": "An Integrity error occured, please try again.",
+                        "nlform": nlform,
+                    },
+                )
         else:
-            render(
-                request,
-                "auctions/new_listing.html",
-                {"nlform": nlform, "message": "Something went wrong, try again later."},
-            )
-
-    return render(request, "auctions/new_listing.html", {"nlform": nlform})
+             return render(
+                    request,
+                    "auctions/new_listing.html",
+                    {
+                        "message": "Invalid Form, please try again.",
+                        "nlform": nlform,
+                    },
+                )
+        return HttpResponseRedirect(reverse("index"))
+    else:
+        nlform = forms.NewListForm()
+        return render(request, "auctions/new_listing.html", {"nlform": nlform})

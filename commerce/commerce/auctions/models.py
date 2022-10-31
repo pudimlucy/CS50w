@@ -5,21 +5,16 @@ from django.db import models
 
 
 from django.contrib.auth.models import AbstractUser
-from django.forms import DateTimeField
+from django.forms import DateTimeField, DecimalField
 from django.db import models
-
-# Django app that adds support for Money fields, access on https://github.com/django-money
-from djmoney.models.fields import MoneyField
 
 
 class User(AbstractUser):
     """Custom User model - inherited from Django implementation"""
-
-    balance = MoneyField(
+    balance = DecimalField(
         decimal_places=4,
         max_digits=19,
-        default=5000,
-        default_currency="USD",
+        min_value=0,
     )
     cellphone = models.CharField(max_length=14)
     address = models.CharField(max_length=255)
@@ -37,17 +32,15 @@ class Listings(models.Model):
     category = models.CharField(max_length=250, default=("ETC", "Everything Else"))
     image_link = models.CharField(max_length=250, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    start_price = MoneyField(
+    start_price = DecimalField(
         decimal_places=2,
         max_digits=19,
-        default=0,
-        default_currency="USD",
+        min_value=0,
     )
-    current_price = MoneyField(
+    current_price = DecimalField(
         decimal_places=4,
         max_digits=19,
-        default=0,
-        default_currency="USD",
+        min_value=0,
     )
     quantity = models.IntegerField()
     number_of_bids = models.IntegerField()
@@ -61,12 +54,7 @@ class Bids(models.Model):
 
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     auction_id = models.ForeignKey(Listings, on_delete=models.CASCADE)
-    bid_value = MoneyField(
-        decimal_places=4,
-        max_digits=19,
-        default=0,
-        default_currency="USD",
-    )
+    bid_value = DecimalField(decimal_places=4, max_digits=19, min_value=0)
     bid_date = models.DateField(auto_now_add=True)
 
 

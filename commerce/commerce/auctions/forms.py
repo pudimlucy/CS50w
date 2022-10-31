@@ -3,12 +3,9 @@ from unicodedata import name
 from attr import attrs
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
+from django.forms import NumberInput
 
 from .models import User
-
-# Django app that adds support for Money fields, access on https://github.com/django-money
-from djmoney.forms.widgets import MoneyWidget
-from djmoney.forms.fields import MoneyField
 
 
 class CustomRegisterForm(UserCreationForm):
@@ -20,6 +17,28 @@ class CustomRegisterForm(UserCreationForm):
                 "class": "form-control",
                 "type": "email",
                 "name": "email",
+            }
+        ),
+    )
+    first_name = forms.CharField(
+        label="first name",
+        required=True,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "type": "text",
+                "name": "first_name",
+            }
+        ),
+    )
+    last_name = forms.CharField(
+        label="last name",
+        required=True,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "type": "text",
+                "name": "last_name",
             }
         ),
     )
@@ -83,6 +102,8 @@ class CustomRegisterForm(UserCreationForm):
         model = User
         fields = [
             "username",
+            "first_name",
+            "last_name",
             "email",
             "cellphone",
             "address",
@@ -161,20 +182,21 @@ class NewListForm(forms.Form):
         ),
     )
 
-    start_price = forms.DecimalField(
-        label="Starting Price",
-        required=True,
-        decimal_places=2,
-        min_value=0,
-        widget=MoneyWidget(
-            default_currency="USD",
-            attrs={
-                "class": "form-control",
-                "type": "number",
-                "min": "0",
-                "step": "0.01",
-                "name": "starting_price",
-            },
+    start_price = (
+        forms.DecimalField(
+            label="Starting Price",
+            required=True,
+            decimal_places=2,
+            min_value=0,
+            widget=NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "number",
+                    "name": "image_link",
+                    "min": "1",
+                    "step": "any",
+                }
+            ),
         ),
     )
 
