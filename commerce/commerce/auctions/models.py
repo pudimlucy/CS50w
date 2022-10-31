@@ -13,7 +13,7 @@ class User(AbstractUser):
     """Custom User model - inherited from Django implementation"""
 
     balance = DecimalField(
-        decimal_places=4,
+        decimal_places=2,
         max_digits=19,
         min_value=0,
     )
@@ -32,14 +32,14 @@ class Listings(models.Model):
     item_title = models.CharField(max_length=250)
     category = models.CharField(max_length=3, default=("ETC", "Everything Else"))
     image_link = models.CharField(max_length=250, null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
+    description = models.CharField(max_length=250, null=True, blank=True)
     start_price = models.DecimalField(
         decimal_places=2,
         max_digits=19,
         default=0.0,
     )
     current_price = models.DecimalField(
-        decimal_places=4,
+        decimal_places=2,
         max_digits=19,
         default=0.0,
     )
@@ -48,6 +48,7 @@ class Listings(models.Model):
     bidders = models.IntegerField()
     watchers = models.IntegerField()
     start_date = models.DateField(auto_now_add=True, blank=True)
+    closed = models.BooleanField(default=False)
 
 
 class Bids(models.Model):

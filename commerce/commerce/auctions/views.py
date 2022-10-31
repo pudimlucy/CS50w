@@ -12,7 +12,12 @@ from . import forms
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    # Get all listings descending
+    listings = Listings.objects.filter(closed=False).order_by("-start_date")
+
+    return render(request, "auctions/index.html", {
+        "listings": listings
+    })
 
 
 def login_view(request):
