@@ -1,16 +1,28 @@
 from email.policy import default
 from unicodedata import name
 from attr import attrs
-from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from django.forms import NumberInput
+from django.core.validators import RegexValidator
 
 from .models import User
 
 
-class CustomRegisterForm(UserCreationForm):
+class CustomRegisterForm(forms.Form):
+
+    username = forms.CharField(
+        label="Username",
+        required=True,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "type": "text",
+                "name": "username",
+            }
+        ),
+    )
     email = forms.EmailField(
-        label="email",
+        label="Email",
         required=True,
         widget=forms.TextInput(
             attrs={
@@ -21,7 +33,7 @@ class CustomRegisterForm(UserCreationForm):
         ),
     )
     first_name = forms.CharField(
-        label="first name",
+        label="First Name",
         required=True,
         widget=forms.TextInput(
             attrs={
@@ -32,7 +44,7 @@ class CustomRegisterForm(UserCreationForm):
         ),
     )
     last_name = forms.CharField(
-        label="last name",
+        label="Last Name",
         required=True,
         widget=forms.TextInput(
             attrs={
@@ -43,8 +55,9 @@ class CustomRegisterForm(UserCreationForm):
         ),
     )
     cellphone = forms.CharField(
-        label="cellphone",
-        required=True,
+        label="Cellphone*",
+        required=False,
+        validators=[RegexValidator(r"^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$", "Please input a US phone number.")],
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
@@ -54,7 +67,7 @@ class CustomRegisterForm(UserCreationForm):
         ),
     )
     address = forms.CharField(
-        label="address",
+        label="Address",
         required=True,
         widget=forms.TextInput(
             attrs={
@@ -65,7 +78,7 @@ class CustomRegisterForm(UserCreationForm):
         ),
     )
     town = forms.CharField(
-        label="town",
+        label="Town",
         required=True,
         widget=forms.TextInput(
             attrs={
@@ -76,7 +89,7 @@ class CustomRegisterForm(UserCreationForm):
         ),
     )
     country = forms.CharField(
-        label="country",
+        label="Country",
         required=True,
         widget=forms.TextInput(
             attrs={
@@ -87,13 +100,35 @@ class CustomRegisterForm(UserCreationForm):
         ),
     )
     postcode = forms.CharField(
-        label="postcode",
+        label="Postcode",
         required=True,
+        validators=[RegexValidator(r"^[a-z0-9][a-z0-9\- ]{0,10}[a-z0-9]$", "Invalid postcode. If you think it should be valid, please contact our support.")],
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
                 "type": "text",
                 "name": "postcode",
+            }
+        ),
+    )
+
+    password = forms.CharField(
+        label="Password",
+        required=True,
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "name": "password",
+            }
+        ),
+    )
+    confirmation = forms.CharField(
+        label="Confirm Password",
+        required=True,
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "name": "confirmation",
             }
         ),
     )
@@ -110,8 +145,8 @@ class CustomRegisterForm(UserCreationForm):
             "town",
             "country",
             "postcode",
-            "password1",
-            "password2",
+            "password",
+            "confirmation",
         ]
 
 
@@ -172,6 +207,7 @@ class NewListForm(forms.Form):
     image_link = forms.CharField(
         label="Image Link",
         required=False,
+        validators=[RegexValidator(r"(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|png)", "Invalid URL. Please provide the link to a jpeg or png.")],
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
@@ -182,23 +218,21 @@ class NewListForm(forms.Form):
         ),
     )
 
-    start_price = (
-        forms.DecimalField(
+    start_price = forms.DecimalField(
             label="Starting Price",
             required=True,
             decimal_places=2,
-            min_value=0,
+            min_value=0.01,
             widget=NumberInput(
                 attrs={
                     "class": "form-control",
                     "type": "number",
                     "name": "image_link",
-                    "min": "1",
+                    "min": "0.01",
                     "step": "any",
                 }
             ),
-        ),
-    )
+        )
 
     quantity = forms.IntegerField(
         label="quantity",

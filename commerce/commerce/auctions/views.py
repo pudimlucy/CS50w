@@ -7,7 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User
+from .models import User, Listings
 from . import forms
 
 
@@ -46,8 +46,8 @@ def register(request):
     if request.method == "POST":
         nuform = forms.CustomRegisterForm(request.POST)
         # Ensure password matches confirmation
-        password = request.POST["password1"]
-        confirmation = request.POST["password2"]
+        password = request.POST["password"]
+        confirmation = request.POST["confirmation"]
         if password != confirmation:
             return render(
                 request,
@@ -59,40 +59,50 @@ def register(request):
             )
 
         # Attempt to create new user
-        username = request.POST["username"]
-        first_name = request.POST["first_name"]
-        last_name = request.POST["last_name"]
-        email = request.POST["email"]
-        cellphone = request.POST["cellphone"]
-        address = request.POST["address"]
-        town = request.POST["town"]
-        country = request.POST["country"]
-        postcode = request.POST["postcode"]
-        try:
-            user = User.objects.create_user(
-                username=username,
-                first_name=first_name,
-                last_name=last_name,
-                email=email,
-                password=password,
-                cellphone=cellphone,
-                address=address,
-                town=town,
-                country=country,
-                postcode=postcode,
-            )
-            user.save()
-        except IntegrityError:
+        if nuform.is_valid():
+            username = request.POST["username"]
+            first_name = request.POST["first_name"]
+            last_name = request.POST["last_name"]
+            email = request.POST["email"]
+            cellphone = request.POST["cellphone"]
+            address = request.POST["address"]
+            town = request.POST["town"]
+            country = request.POST["country"]
+            postcode = request.POST["postcode"]
+            try:
+                user = User.objects.create_user(
+                    username=username,
+                    first_name=first_name,
+                    last_name=last_name,
+                    email=email,
+                    password=password,
+                    cellphone=cellphone,
+                    address=address,
+                    town=town,
+                    country=country,
+                    postcode=postcode,
+                )
+                user.save()
+            except IntegrityError:
+                return render(
+                    request,
+                    "auctions/register.html",
+                    {
+                        "message": "Username already taken.",
+                        "nuform": nuform,
+                    },
+                )
+            login(request, user)
+            return HttpResponseRedirect(reverse("index"))
+        else:
             return render(
-                request,
-                "auctions/register.html",
-                {
-                    "message": "Username already taken.",
-                    "nuform": nuform,
-                },
-            )
-        login(request, user)
-        return HttpResponseRedirect(reverse("index"))
+            request,
+            "auctions/register.html",
+            {
+                "message": "Invalid form, please try again.",
+                "nuform":nuform,
+            },
+        )
     else:
         return render(
             request,
@@ -108,24 +118,23 @@ def new_listing(request):
 
     if request.method == "POST":
         nlform = forms.NewListForm(request.POST)
-        
+
         if nlform.is_valid():
-            user_id = User.objects.get(id=request.user.id)
-            item_title = request.POST["item-title"]
+            item_title = request.POST["item_title"]
             category = request.POST["category"]
             image_link = request.POST["image_link"]
-            current_price = starting_price = request.POST["starting_price"]
+            current_price = start_price = request.POST["start_price"]
             quantity = request.POST["quantity"]
             description = request.POST["description"]
 
             try:
-                listing = forms.NewListForm(
-                    user_id=user_id,
+                listing = Listings(
+                    user_id=User.objects.get(pk=request.user.id),
                     item_title=item_title,
                     category=category,
                     image_link=image_link,
                     current_price=current_price,
-                    starting_price=starting_price,
+                    start_price=start_price,
                     quantity=quantity,
                     description=description,
                     number_of_bids=0,
@@ -143,15 +152,16 @@ def new_listing(request):
                     },
                 )
         else:
-             return render(
-                    request,
-                    "auctions/new_listing.html",
-                    {
-                        "message": "Invalid Form, please try again.",
-                        "nlform": nlform,
-                    },
-                )
+            return render(
+                request,
+                "auctions/new_listing.html",
+                {
+                    "message": "Invalid Form, please try again.",
+                    "nlform": nlform,
+                },
+            )
         return HttpResponseRedirect(reverse("index"))
     else:
-        nlform = forms.NewListForm()
-        return render(request, "auctions/new_listing.html", {"nlform": nlform})
+        return render(
+            request, "auctions/new_listing.html", {"nlform": forms.NewListForm()}
+        )

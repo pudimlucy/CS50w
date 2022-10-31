@@ -10,6 +10,9 @@
         <div>{{ message }}</div>
     {% endif %}
 
+    <div class="container">
+        <i class="small">fields with a * are optional</i>
+    </div> 
     <form action="{% url 'register' %}" method="POST">
         {% csrf_token %}
         <div class="container">
