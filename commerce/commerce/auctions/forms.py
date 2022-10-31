@@ -57,7 +57,12 @@ class CustomRegisterForm(forms.Form):
     cellphone = forms.CharField(
         label="Cellphone*",
         required=False,
-        validators=[RegexValidator(r"^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$", "Please input a US phone number.")],
+        validators=[
+            RegexValidator(
+                r"^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$",
+                "Please input a US phone number.",
+            )
+        ],
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
@@ -102,7 +107,12 @@ class CustomRegisterForm(forms.Form):
     postcode = forms.CharField(
         label="Postcode",
         required=True,
-        validators=[RegexValidator(r"^[a-z0-9][a-z0-9\- ]{0,10}[a-z0-9]$", "Invalid postcode. If you think it should be valid, please contact our support.")],
+        validators=[
+            RegexValidator(
+                r"^[a-z0-9][a-z0-9\- ]{0,10}[a-z0-9]$",
+                "Invalid postcode. If you think it should be valid, please contact our support.",
+            )
+        ],
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
@@ -207,7 +217,12 @@ class NewListForm(forms.Form):
     image_link = forms.CharField(
         label="Image Link",
         required=False,
-        validators=[RegexValidator(r"(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|png)", "Invalid URL. Please provide the link to a jpeg or png.")],
+        validators=[
+            RegexValidator(
+                r"(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|png)",
+                "Invalid URL. Please provide the link to a jpeg or png.",
+            )
+        ],
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
@@ -219,20 +234,20 @@ class NewListForm(forms.Form):
     )
 
     start_price = forms.DecimalField(
-            label="Starting Price",
-            required=True,
-            decimal_places=2,
-            min_value=0.01,
-            widget=NumberInput(
-                attrs={
-                    "class": "form-control",
-                    "type": "number",
-                    "name": "image_link",
-                    "min": "0.01",
-                    "step": "any",
-                }
-            ),
-        )
+        label="Starting Price",
+        required=True,
+        decimal_places=2,
+        min_value=0.01,
+        widget=NumberInput(
+            attrs={
+                "class": "form-control",
+                "type": "number",
+                "name": "image_link",
+                "min": "0.01",
+                "step": "any",
+            }
+        ),
+    )
 
     quantity = forms.IntegerField(
         label="quantity",

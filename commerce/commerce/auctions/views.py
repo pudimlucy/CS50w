@@ -96,13 +96,13 @@ def register(request):
             return HttpResponseRedirect(reverse("index"))
         else:
             return render(
-            request,
-            "auctions/register.html",
-            {
-                "message": "Invalid form, please try again.",
-                "nuform":nuform,
-            },
-        )
+                request,
+                "auctions/register.html",
+                {
+                    "message": "Invalid form, please try again.",
+                    "nuform": nuform,
+                },
+            )
     else:
         return render(
             request,
