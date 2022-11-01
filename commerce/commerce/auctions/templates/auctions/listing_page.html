@@ -1,26 +1,62 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
+
+    {% comment %} User is Authenticated {% endcomment %}
+    {% if user.is_authenticated %}
+
+        {% comment %} User is a Client {% endcomment %}
+        {% if user.id != listing.user_id %}
+
+            {% comment %}  Watchlist Form {% endcomment %}
+            <form action="{% url 'watchlist' %}" method="POST">
+                {% csrf_token %}
+                {% if watching %}
+                    <input type="submit" class="btn btn-danger" value="Remove from Watchlist">
+                    <input type="hidden" name="watching" value="True">
+                {% else %}
+                    <input type="submit" class="btn btn-success" value="Add to Watchlist">
+                    <input type="hidden" name="watching" value="False">
+                {% endif %}
+                <input type="hidden" name="listing_id" value={{listing.id}}>
+            </form>
+
+        {% comment %} User is Seller {% endcomment %}
+        {% else %}
+            {% comment %} close bid {% endcomment %}
+        {% endif %}
+    {% endif %}
     <h2>{{listing.item_title}}</h2>
     {% if listing.image_link %}
         <img src="{{ listing.image_link }}" alt="{{ listing.item_title }} image">
     {% endif %}
     <div class="container">
-        Quantity available: {{listing.quantity}}
-        Bids Made: {{listing.numbers_of_bids}}
-        Bidders: {{listing.bidders}}
-        fuckers watching: {{listing.watchers}}
-        Date Start: {{listing.start_date}}
-        Seller: TODO
+        {% comment %} Bids Made: {{bids}}
+        Watchers: {{watchers}} {% endcomment %}
+        Date Started: {{listing.start_date}}
+        {% comment %} Seller: seller {% endcomment %}
         Category: {{listing.category}}
-        Starting Date: {{listing.start_date}}
-        Closed Date: TODO
-        Current Price: {{listing.current_price}}
+        
+        {% comment %} Audition is Closed {% endcomment %}
+        {% if listing.closed %}
+            <h4>Audit Closed!</h4>
+            {% comment %} Closed Data: highest_bid.bid_date {% endcomment %}
+            {% if user.id != highest_bid.user_id %}
+                {% comment %} Sold by highest_bid.bid_value to highest_bid.user_id {% endcomment %}
+            {% else %}
+                {% comment %} You won with a bid of {{highest_bid.bid_value}}! {% endcomment %}
+            {% endif %}
+        {% else %}
+            {% comment %} Current Price: {{highest_bid.bid_value}} {% endcomment %}
+        {% endif %}
+
     </div>
-    {% comment %} TODO: Watchlist {% endcomment %}
-    {% comment %} TODO: Bid {% endcomment %}
-    {% comment %} TODO: Close {% endcomment %}
-    {% comment %} TODO: Watchlist {% endcomment %}
-    {% comment %} TODO: Display Winner {% endcomment %}
-    {% comment %} TODO: Comments {% endcomment %}
+    <div class="container">
+        {% if user.is_authenticated and user.id != listing.user_id %}
+
+        {% comment %} bid form {% endcomment %}
+
+        {% endif %}
+    </div>
+    {% comment %} Comments Form {% endcomment %}
 {% endblock %}

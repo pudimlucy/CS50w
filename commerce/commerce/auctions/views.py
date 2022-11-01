@@ -7,7 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Listings
+from .models import User, Listings, Watches
 from . import forms
 
 
@@ -126,7 +126,7 @@ def new_listing(request):
             item_title = request.POST["item_title"]
             category = request.POST["category"]
             image_link = request.POST["image_link"]
-            current_price = start_price = request.POST["start_price"]
+            start_price = request.POST["start_price"]
             quantity = request.POST["quantity"]
             description = request.POST["description"]
 
@@ -136,13 +136,9 @@ def new_listing(request):
                     item_title=item_title,
                     category=category,
                     image_link=image_link,
-                    current_price=current_price,
                     start_price=start_price,
                     quantity=quantity,
                     description=description,
-                    number_of_bids=0,
-                    bidders=0,
-                    watchers=0,
                 )
                 listing.save()
             except IntegrityError:
@@ -174,8 +170,71 @@ def new_listing(request):
 def listing_page(request, item_id):
     try:
         listing = Listings.objects.get(pk=item_id)
+        user = User.objects.get(pk=request.user.id)
     except Listings.DoesNotExist:
         return render(
             request, "auctions/index.html", {"message": "Auction doesn't exist."}
         )
-    return render(request, "auctions/listing_page.html", {"listing": listing})
+
+    if request.user.is_authenticated:
+        watch = Watches.objects.filter(
+            listing_id=item_id, user_id=User.objects.get(id=request.user.id)
+        ).first()
+
+        if watch is None:
+            watching = False
+        else:
+            watching = True
+    else:
+        watching = False
+
+    return render(
+        request,
+        "auctions/listing_page.html",
+        {
+            "listing": listing,
+            "user": user,
+            "watching": watching,
+        },
+    )
+
+
+@login_required(login_url="login")
+def watchlist(request):
+    if request.method == "POST":
+
+        listing_id = request.POST.get("listing_id")
+        listing = Listings.objects.get(id=listing_id)
+        try:
+            ...
+        except Listings.DoesNotExist:
+            return render(
+                request, "auctions/index.html", {"message": "Auction doesn't exist"}
+            )
+
+        user = User.objects.get(pk=request.user.id)
+
+        if request.POST.get("watching") == "True":
+            delete = Watches.objects.filter(
+                user_id=user,
+                listing_id=listing,
+            )
+            delete.delete()
+        else:
+            try:
+                save = Watches(user_id=user, listing_id=listing)
+                save.save()
+            except IntegrityError:
+                return render(
+                    request,
+                    "auctions/index.html",
+                    {"message": "Auction is already on your watchlist"},
+                )
+        return HttpResponseRedirect("/" + listing_id)
+
+    watchlist_ids = Watches.objects.filter(user_id=request.user.id).values_list(
+        "listing_id"
+    )
+    watchlist_items = Listings.objects.filter(id__in=watchlist_ids)
+
+    return render(request, "auctions/watchlist.html", {"watchlist": watchlist_items})

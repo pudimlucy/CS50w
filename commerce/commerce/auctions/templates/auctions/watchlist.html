@@ -1,0 +1,38 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Your Watchlist</h2>
+
+    {% if message %}
+        {{message}}
+    {% endif %}
+
+    {% for listing in watchlist %}
+        <div class="container">
+            <a href="{% url 'listing_page' item_id=listing.id %}">
+            {% if listing.image_link %}
+                <div class="container">
+                    <img src="{{ listing.image_link }}" alt="{{ listing.item_title }} image">
+                </div>
+            {% endif %}
+                <div class="container">
+                    <h5> {{ listing.item_title }}</h5>
+                    <div>
+                        <i>Description:</i> <i>{{listing.description}}</i>
+                    </div>
+                    <div>
+                        <strong>Price:</strong> {{listing.current_price}}$
+                    </div>
+                    <div class="container">
+                        <strong>Category:</strong> {{listing.category}}
+                    </div>
+                    <div class="container">
+                        {{listing.start_date}}
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% empty %}
+            No items being watched. Please reload if items were expected.
+    {% endfor %}
+{% endblock %}

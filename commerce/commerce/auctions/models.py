@@ -8,6 +8,7 @@ from django.contrib.auth.models import AbstractUser
 from django.forms import DateTimeField, DecimalField
 from django.db import models
 
+
 class User(AbstractUser):
     """Custom User model - inherited from Django implementation"""
 
@@ -37,15 +38,6 @@ class Listings(models.Model):
         max_digits=19,
         default=0.0,
     )
-    current_price = models.DecimalField(
-        decimal_places=2,
-        max_digits=19,
-        default=0.0,
-    )
-    quantity = models.IntegerField()
-    number_of_bids = models.IntegerField()
-    bidders = models.IntegerField()
-    watchers = models.IntegerField()
     start_date = models.DateField(auto_now_add=True, blank=True)
     closed = models.BooleanField(default=False)
 
