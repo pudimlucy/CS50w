@@ -28,7 +28,7 @@ class User(AbstractUser):
 class Listings(models.Model):
     """Model for product listing on Auditions"""
 
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     item_title = models.CharField(max_length=250)
     category = models.CharField(max_length=3, default=("ETC", "Everything Else"))
     image_link = models.CharField(max_length=250, null=True, blank=True)
@@ -36,7 +36,7 @@ class Listings(models.Model):
     start_price = models.DecimalField(
         decimal_places=2,
         max_digits=19,
-        default=0.0,
+        default=0.1,
     )
     start_date = models.DateField(auto_now_add=True, blank=True)
     closed = models.BooleanField(default=False)
@@ -45,17 +45,17 @@ class Listings(models.Model):
 class Bids(models.Model):
     """Model for Bids on Auditions"""
 
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    auction_id = models.ForeignKey(Listings, on_delete=models.CASCADE)
-    bid_value = DecimalField(decimal_places=4, max_digits=19, min_value=0)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    listing = models.ForeignKey(Listings, on_delete=models.CASCADE)
+    bid_value = models.DecimalField(decimal_places=2, max_digits=19)
     bid_date = models.DateField(auto_now_add=True)
 
 
 class Comments(models.Model):
     """Model for Comments on Auditions"""
 
-    listing_id = models.ForeignKey(Listings, on_delete=models.CASCADE)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    listing = models.ForeignKey(Listings, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.TextField(null=True, blank=True)
     time_sent = models.DateTimeField(auto_now_add=True)
 
@@ -63,5 +63,5 @@ class Comments(models.Model):
 class Watches(models.Model):
     """Model for Watches on Auditions"""
 
-    listing_id = models.ForeignKey(Listings, on_delete=models.CASCADE)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    listing = models.ForeignKey(Listings, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)

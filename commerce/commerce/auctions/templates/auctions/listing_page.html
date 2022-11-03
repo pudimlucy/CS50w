@@ -3,10 +3,10 @@
 {% block body %}
 
     {% comment %} User is Authenticated {% endcomment %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and not listing.closed %}
 
         {% comment %} User is a Client {% endcomment %}
-        {% if user.id != listing.user_id %}
+        {% if user.id != listing.user.id %}
 
             {% comment %}  Watchlist Form {% endcomment %}
             <form action="{% url 'watchlist' %}" method="POST">
@@ -31,10 +31,9 @@
         <img src="{{ listing.image_link }}" alt="{{ listing.item_title }} image">
     {% endif %}
     <div class="container">
-        {% comment %} Bids Made: {{bids}}
-        Watchers: {{watchers}} {% endcomment %}
+        Bids Made: {{bids_made}} 
         Date Started: {{listing.start_date}}
-        {% comment %} Seller: seller {% endcomment %}
+        Seller: {{seller}}
         Category: {{listing.category}}
         
         {% comment %} Audition is Closed {% endcomment %}
@@ -47,16 +46,27 @@
                 {% comment %} You won with a bid of {{highest_bid.bid_value}}! {% endcomment %}
             {% endif %}
         {% else %}
-            {% comment %} Current Price: {{highest_bid.bid_value}} {% endcomment %}
+            Original Price: {{listing.start_price}}
+            Current Price: {{current_price}}
         {% endif %}
 
+    </div>
+
+    {% if user.is_authenticated and not listing.closed %}
+    <div class="container"> 
+        {{user.id}}
+        {{listing.user_id}}
+        {% if user.id != listing.user.id %}
+            <form action="{% url 'bid' %}" method="POST">
+                {% csrf_token %}
+                {{bform}}
+                <input type="submit" class="btn btn-success" value="make bid">
+                <input type="hidden" name="listing_id" value={{listing.id}}>
+            </form>
+        {% endif %}
     </div>
     <div class="container">
-        {% if user.is_authenticated and user.id != listing.user_id %}
-
-        {% comment %} bid form {% endcomment %}
-
-        {% endif %}
+        {% comment %} Comments Form {% endcomment %}
     </div>
-    {% comment %} Comments Form {% endcomment %}
+    {% endif %}
 {% endblock %}

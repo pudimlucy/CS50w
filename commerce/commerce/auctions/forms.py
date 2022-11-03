@@ -5,7 +5,7 @@ from django import forms
 from django.forms import NumberInput
 from django.core.validators import RegexValidator
 
-from .models import User
+from .models import Bids, User
 
 
 class CustomRegisterForm(forms.Form):
@@ -249,23 +249,28 @@ class NewListForm(forms.Form):
         ),
     )
 
-    quantity = forms.IntegerField(
-        label="quantity",
-        required=True,
-        min_value=1,
-        widget=forms.TextInput(
-            attrs={
-                "class": "form-control",
-                "type": "number",
-                "name": "quantity",
-                "min": "1",
-                "placeholder": "Quantity Available...",
-            }
-        ),
-    )
-
     description = forms.CharField(
         label="Description",
         required=True,
         widget=forms.Textarea(attrs={"class": "col-sm-11", "name": "description"}),
     )
+
+
+class BidForm(forms.Form):
+
+    bid_value = forms.DecimalField(
+        label="Place a Bid",
+        required=True,
+        decimal_places=2,
+        widget=NumberInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Bid value(in US dollars)...",
+                "type": "number",
+                "name": "bid_value",
+                "min": "0.01",
+                "step": "any",
+            }
+        ),
+    )
+

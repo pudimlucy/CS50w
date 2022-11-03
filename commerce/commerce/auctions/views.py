@@ -7,7 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Listings, Watches
+from .models import User, Listings, Watches, Bids
 from . import forms
 
 
@@ -96,7 +96,6 @@ def register(request):
                     },
                 )
             login(request, user)
-            return HttpResponseRedirect(reverse("index"))
         else:
             return render(
                 request,
@@ -114,6 +113,7 @@ def register(request):
                 "nuform": forms.CustomRegisterForm(),
             },
         )
+    return HttpResponseRedirect(reverse("index"))
 
 
 @login_required(login_url="login")
@@ -127,17 +127,15 @@ def new_listing(request):
             category = request.POST["category"]
             image_link = request.POST["image_link"]
             start_price = request.POST["start_price"]
-            quantity = request.POST["quantity"]
             description = request.POST["description"]
 
             try:
                 listing = Listings(
-                    user_id=User.objects.get(pk=request.user.id),
+                    user=User.objects.get(pk=request.user.id),
                     item_title=item_title,
                     category=category,
                     image_link=image_link,
                     start_price=start_price,
-                    quantity=quantity,
                     description=description,
                 )
                 listing.save()
@@ -173,13 +171,13 @@ def listing_page(request, item_id):
         user = User.objects.get(pk=request.user.id)
     except Listings.DoesNotExist:
         return render(
-            request, "auctions/index.html", {"message": "Auction doesn't exist."}
+            request,
+            "auctions/index.html",
+            {"message": "Invalid request. Please login."},
         )
 
     if request.user.is_authenticated:
-        watch = Watches.objects.filter(
-            listing_id=item_id, user_id=User.objects.get(id=request.user.id)
-        ).first()
+        watch = Watches.objects.filter(listing=item_id, user=user).first()
 
         if watch is None:
             watching = False
@@ -194,7 +192,11 @@ def listing_page(request, item_id):
         {
             "listing": listing,
             "user": user,
+            "seller": User.objects.filter(id=listing.user.id).first(),
             "watching": watching,
+            "bform": forms.BidForm(),
+            "current_price": Bids.objects.filter(listing=listing).order_by("-bid_value").first().bid_value,
+            "bids_made": len(Bids.objects.filter(listing=listing))
         },
     )
 
@@ -203,27 +205,30 @@ def listing_page(request, item_id):
 def watchlist(request):
     if request.method == "POST":
 
-        listing_id = request.POST.get("listing_id")
-        listing = Listings.objects.get(id=listing_id)
         try:
-            ...
+            listing_id = request.POST.get("listing_id")
+            listing = Listings.objects.get(id=listing_id)
+            user = User.objects.get(pk=request.user.id)
         except Listings.DoesNotExist:
             return render(
-                request, "auctions/index.html", {"message": "Auction doesn't exist"}
+                request,
+                "auctions/index.html",
+                {"message": "Invalid request. Please login."},
             )
-
-        user = User.objects.get(pk=request.user.id)
 
         if request.POST.get("watching") == "True":
-            delete = Watches.objects.filter(
-                user_id=user,
-                listing_id=listing,
+            watching = Watches.objects.filter(
+                user=user,
+                listing=listing,
             )
-            delete.delete()
+            watching.delete()
         else:
             try:
-                save = Watches(user_id=user, listing_id=listing)
-                save.save()
+                watching = Watches(
+                    user=user,
+                    listing=listing,
+                )
+                watching.save()
             except IntegrityError:
                 return render(
                     request,
@@ -232,9 +237,71 @@ def watchlist(request):
                 )
         return HttpResponseRedirect("/" + listing_id)
 
-    watchlist_ids = Watches.objects.filter(user_id=request.user.id).values_list(
-        "listing_id"
-    )
-    watchlist_items = Listings.objects.filter(id__in=watchlist_ids)
+    watchlist_list = Watches.objects.filter(user=request.user).values_list("listing")
+    watchlist = Listings.objects.filter(id__in=watchlist_list)
 
-    return render(request, "auctions/watchlist.html", {"watchlist": watchlist_items})
+    return render(request, "auctions/watchlist.html", {"watchlist": watchlist})
+
+
+@login_required(login_url="login")
+def bid(request):
+    if request.method == "POST":
+        try:
+            listing_id = request.POST.get("listing_id")
+            listing = Listings.objects.get(id=listing_id)
+            user = User.objects.get(pk=request.user.id)
+        except Listings.DoesNotExist:
+            return render(
+                request,
+                "auctions/index.html",
+                {"message": "Invalid request. Please login."},
+            )
+
+        if user == listing.user:
+            return render(
+                request, "auctions/index.html", {"message": "Invalid request."}
+            )
+
+        bform = forms.BidForm(request.POST)
+        if bform.is_valid():
+            bid_value = float(request.POST["bid_value"])
+            highest = (
+                Bids.objects.filter(listing=listing).order_by("-bid_value").first()
+            )
+            if (
+                highest is None and bid_value > listing.start_price
+            ) or bid_value > float(highest.bid_value):
+                try:
+                    bid = Bids(
+                        user=user,
+                        listing=listing,
+                        bid_value=bid_value,
+                    )
+                    bid.save()
+                except IntegrityError:
+                    return render(
+                        request,
+                        "auctions/index.html",
+                        {
+                            "message": "An Integrity error occured, please try again.",
+                        },
+                    )
+            else:
+                return render(
+                    request,
+                    "auctions/index.html",
+                    {
+                        "message": "Please bid a value higher than the listing's current value.",
+                    },
+                )
+        else:
+            return render(
+                request,
+                "auctions/index.html",
+                {
+                    "message": "Invalid Form, please try again.",
+                },
+            )
+        return HttpResponseRedirect("/" + listing_id)
+    # TODO: display user's bids on GET request
+    return HttpResponseRedirect("/")
