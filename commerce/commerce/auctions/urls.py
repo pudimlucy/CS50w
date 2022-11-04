@@ -1,4 +1,6 @@
 from django.urls import path
+from django.contrib import admin
+
 
 from . import views
 
@@ -13,4 +15,6 @@ urlpatterns = [
     path("bid", views.bid, name="bid"),
     path("close", views.close, name="close"),
     path("comment", views.comment, name="comment"),
+    path("categories/", views.categories, name="categories"),
+    path("categories/<str:category>", views.categories, name="categories"),
 ]

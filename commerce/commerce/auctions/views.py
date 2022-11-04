@@ -5,14 +5,14 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Listings, Watches, Bids, Comments
+from .models import User, Listing, Watch, Bid, Comment
 from . import forms
 
 from decimal import InvalidOperation
 
 
 def index(request):
-    listings = Listings.objects.filter(close_date=None).order_by("start_date")
+    listings = Listing.objects.filter(close_date=None).order_by("start_date")
     return render(request, "auctions/index.html", {"listings": listings})
 
 
@@ -128,7 +128,7 @@ def new_listing(request):
             description = request.POST["description"]
 
             try:
-                listing = Listings(
+                listing = Listing(
                     user=User.objects.get(pk=request.user.id),
                     item_title=item_title,
                     category=category,
@@ -162,9 +162,9 @@ def new_listing(request):
 @login_required(login_url="login")
 def listing_page(request, item_id):
     try:
-        listing = Listings.objects.get(pk=item_id)
+        listing = Listing.objects.get(pk=item_id)
         user = User.objects.get(pk=request.user.id)
-    except Listings.DoesNotExist:
+    except Listing.DoesNotExist:
         return render(
             request,
             "auctions/index.html",
@@ -172,7 +172,7 @@ def listing_page(request, item_id):
         )
 
     if request.user.is_authenticated:
-        watch = Watches.objects.filter(listing=item_id, user=user).first()
+        watch = Watch.objects.filter(listing=item_id, user=user).first()
 
         if watch is None:
             watching = False
@@ -190,11 +190,11 @@ def listing_page(request, item_id):
             "watching": watching,
             "bform": forms.BidForm(),
             "cform": forms.CommentForm(),
-            "highest_bid": Bids.objects.filter(listing=listing)
+            "highest_bid": Bid.objects.filter(listing=listing)
             .order_by("-bid_value")
             .first(),
-            "bids_made": len(Bids.objects.filter(listing=listing)),
-            "comments": Comments.objects.filter(listing=listing).order_by("-time_sent"),
+            "bids_made": len(Bid.objects.filter(listing=listing)),
+            "comments": Comment.objects.filter(listing=listing).order_by("-time_sent"),
         },
     )
 
@@ -205,9 +205,9 @@ def watchlist(request):
 
         try:
             listing_id = request.POST.get("listing_id")
-            listing = Listings.objects.get(id=listing_id)
+            listing = Listing.objects.get(id=listing_id)
             user = User.objects.get(pk=request.user.id)
-        except Listings.DoesNotExist:
+        except Listing.DoesNotExist:
             return render(
                 request,
                 "auctions/index.html",
@@ -215,14 +215,14 @@ def watchlist(request):
             )
 
         if request.POST.get("watching") == "True":
-            watching = Watches.objects.filter(
+            watching = Watch.objects.filter(
                 user=user,
                 listing=listing,
             )
             watching.delete()
         else:
             try:
-                watching = Watches(
+                watching = Watch(
                     user=user,
                     listing=listing,
                 )
@@ -235,8 +235,8 @@ def watchlist(request):
                 )
         return HttpResponseRedirect("/" + listing_id)
 
-    watchlist_list = Watches.objects.filter(user=request.user).values_list("listing")
-    watchlist = Listings.objects.filter(id__in=watchlist_list)
+    watchlist_list = Watch.objects.filter(user=request.user).values_list("listing")
+    watchlist = Listing.objects.filter(id__in=watchlist_list)
 
     return render(request, "auctions/watchlist.html", {"watchlist": watchlist})
 
@@ -246,9 +246,9 @@ def bid(request):
     if request.method == "POST":
         try:
             listing_id = request.POST.get("listing_id")
-            listing = Listings.objects.get(id=listing_id)
+            listing = Listing.objects.get(id=listing_id)
             user = User.objects.get(pk=request.user.id)
-        except Listings.DoesNotExist:
+        except Listing.DoesNotExist:
             return render(
                 request,
                 "auctions/index.html",
@@ -272,13 +272,13 @@ def bid(request):
         if bform.is_valid():
             bid_value = float(request.POST["bid_value"])
             highest_bid = (
-                Bids.objects.filter(listing=listing).order_by("-bid_value").first()
+                Bid.objects.filter(listing=listing).order_by("-bid_value").first()
             )
             if (
                 highest_bid is None and bid_value > listing.start_price
             ) or bid_value > float(highest_bid.bid_value):
                 try:
-                    bid = Bids(
+                    bid = Bid(
                         user=user,
                         listing=listing,
                         bid_value=bid_value,
@@ -328,8 +328,8 @@ def close(request):
     if request.method == "POST":
         try:
             listing_id = request.POST.get("listing_id")
-            listing = Listings.objects.get(id=listing_id)
-        except Listings.DoesNotExist:
+            listing = Listing.objects.get(id=listing_id)
+        except Listing.DoesNotExist:
             return render(
                 request,
                 "auctions/index.html",
@@ -369,9 +369,9 @@ def comment(request):
         cform = forms.CommentForm(request.POST)
         try:
             listing_id = request.POST.get("listing_id")
-            listing = Listings.objects.get(id=listing_id)
+            listing = Listing.objects.get(id=listing_id)
             user = User.objects.get(pk=request.user.id)
-        except Listings.DoesNotExist:
+        except Listing.DoesNotExist:
             return render(
                 request,
                 "auctions/index.html",
@@ -380,7 +380,7 @@ def comment(request):
         if cform.is_valid():
             try:
                 comment_text = request.POST["comment"]
-                comment = Comments(
+                comment = Comment(
                     listing=listing,
                     user=user,
                     comment_text=comment_text,
@@ -403,4 +403,19 @@ def comment(request):
                 },
             )
         return HttpResponseRedirect("/" + listing_id)
+    return HttpResponseRedirect(reverse("index"))
+
+
+def categories(request, category=None):
+    if request.method == "POST":
+        search = forms.CategoryForm(request.POST)
+        if search.is_valid():
+            return HttpResponseRedirect(request.POST["category"])
+        return render(
+                request,
+                "auctions/index.html",
+                {
+                    "message": "Invalid Form, please try again.",
+                },
+            )
     return HttpResponseRedirect(reverse("index"))

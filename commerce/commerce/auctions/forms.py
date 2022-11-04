@@ -5,6 +5,36 @@ from django.core.validators import RegexValidator
 from .models import User
 
 
+CATEGORIES = (
+    ("ETC", "Everything Else"),
+    ("ANQ", "Antiques"),
+    ("ART", "Art"),
+    ("BBY", "Baby"),
+    ("BKS", "Books"),
+    ("BUS", "Bussiness & Industrial"),
+    ("CAM", "Cameras & Photo"),
+    ("CLP", "Cellphones"),
+    ("CLT", "Clothing"),
+    ("COL", "Collectibles"),
+    ("CPT", "Computers"),
+    ("CRL", "Consumer Eletronics"),
+    ("CRT", "Crafts"),
+    ("DOL", "Dolls & Bears"),
+    ("DVD", "DVDs and Movies"),
+    ("HLT", "Health & Beauty"),
+    ("HOM", "Home & Garden"),
+    ("JWL", "Jewerly & Watches"),
+    ("MSC", "Music"),
+    ("PET", "Pet Supplies"),
+    ("PTR", "Pottery & Glasses"),
+    ("RLS", "Real State"),
+    ("SPC", "Speciality Services"),
+    ("SPT", "Sporting Goods"),
+    ("TOY", "Toys & Hobbies"),
+    ("VDG", "Video Games & Consoles"),
+)
+
+
 class CustomRegisterForm(forms.Form):
 
     username = forms.CharField(
@@ -174,34 +204,7 @@ class NewListForm(forms.Form):
     category = forms.ChoiceField(
         label="category",
         required=False,
-        choices=(
-            ("ETC", "Everything Else"),
-            ("ANQ", "Antiques"),
-            ("ART", "Art"),
-            ("BBY", "Baby"),
-            ("BKS", "Books"),
-            ("BUS", "Bussiness & Industrial"),
-            ("CAM", "Cameras & Photo"),
-            ("CLP", "Cellphones"),
-            ("CLT", "Clothing"),
-            ("COL", "Collectibles"),
-            ("CPT", "Computers"),
-            ("CRL", "Consumer Eletronics"),
-            ("CRT", "Crafts"),
-            ("DOL", "Dolls & Bears"),
-            ("DVD", "DVDs and Movies"),
-            ("HLT", "Health & Beauty"),
-            ("HOM", "Home & Garden"),
-            ("JWL", "Jewerly & Watches"),
-            ("MSC", "Music"),
-            ("PET", "Pet Supplies"),
-            ("PTR", "Pottery & Glasses"),
-            ("RLS", "Real State"),
-            ("SPC", "Speciality Services"),
-            ("SPT", "Sporting Goods"),
-            ("TOY", "Toys & Hobbies"),
-            ("VDG", "Video Games & Consoles"),
-        ),
+        choices=CATEGORIES,
         widget=forms.Select(
             attrs={
                 "class": "form-control",
@@ -283,6 +286,20 @@ class CommentForm(forms.Form):
                 "class": "form-control",
                 "type": "text",
                 "name": "comment",
+            }
+        ),
+    )
+
+class CategoryForm(forms.Form):
+    category = forms.ChoiceField(
+        label="category",
+        required=False,
+        choices=CATEGORIES,
+        widget=forms.Select(
+            attrs={
+                "class": "form-control",
+                "type": "text",
+                "name": "category",
             }
         ),
     )

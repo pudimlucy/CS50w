@@ -1,0 +1,45 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Search by Category</h2>
+
+    <div class="container">
+        <form action="{% url 'categories' %}" method="POST">
+            {% csrf_token %}
+            {{categories}}
+            <input type="submit" class="btn btn-success" value="search">
+        </form>
+    </div>
+
+        <h3>Results: </h3>
+        {% for listing in listings %}
+            {% if listing.close_date is None %}
+                <div class="container">
+                    <a href="{% url 'listing_page' item_id=listing.id %}">
+                    {% if listing.image_link %}
+                        <div class="container">
+                            <img src="{{ listing.image_link }}" alt="{{ listing.item_title }} image">
+                        </div>
+                    {% endif %}
+                        <div class="container">
+                            <h5> {{ listing.item_title }}</h5>
+                            <div>
+                                <i>Description:</i> <i>{{listing.description}}</i>
+                            </div>
+                            <div>
+                                <strong>Price:</strong> {{listing.current_price}}$
+                            </div>
+                            <div class="container">
+                                <strong>Category:</strong> {{listing.category}}
+                            </div>
+                            <div class="container">
+                                {{listing.start_date}}
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% endif %}
+        {% empty %}
+                No items.
+        {% endfor %}
+{% endblock %}

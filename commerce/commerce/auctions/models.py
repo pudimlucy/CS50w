@@ -13,7 +13,7 @@ class User(AbstractUser):
     pass
 
 
-class Listings(models.Model):
+class Listing(models.Model):
     """Model for product listing on Auditions"""
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -30,26 +30,26 @@ class Listings(models.Model):
     close_date = models.DateTimeField(null=True, blank=True)
 
 
-class Bids(models.Model):
+class Bid(models.Model):
     """Model for Bids on Auditions"""
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    listing = models.ForeignKey(Listings, on_delete=models.CASCADE)
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     bid_value = models.DecimalField(decimal_places=2, max_digits=19)
     bid_date = models.DateField(auto_now_add=True)
 
 
-class Comments(models.Model):
+class Comment(models.Model):
     """Model for Comments on Auditions"""
 
-    listing = models.ForeignKey(Listings, on_delete=models.CASCADE)
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     comment_text = models.TextField(null=True, blank=True)
     time_sent = models.DateTimeField(auto_now_add=True)
 
 
-class Watches(models.Model):
+class Watch(models.Model):
     """Model for Watches on Auditions"""
 
-    listing = models.ForeignKey(Listings, on_delete=models.CASCADE)
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
