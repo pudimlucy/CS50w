@@ -1,5 +1,3 @@
-import re
-from unicodedata import category
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
@@ -7,14 +5,14 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Listings, Watches, Bids
+from .models import User, Listings, Watches, Bids, Comments
 from . import forms
+
+from decimal import InvalidOperation
 
 
 def index(request):
-    # Get all listings descending
-    listings = Listings.objects.filter(closed=False).order_by("start_date")
-
+    listings = Listings.objects.filter(close_date=None).order_by("start_date")
     return render(request, "auctions/index.html", {"listings": listings})
 
 
@@ -158,10 +156,7 @@ def new_listing(request):
                 },
             )
         return HttpResponseRedirect(reverse("index"))
-    else:
-        return render(
-            request, "auctions/new_listing.html", {"nlform": forms.NewListForm()}
-        )
+    return render(request, "auctions/new_listing.html", {"nlform": forms.NewListForm()})
 
 
 @login_required(login_url="login")
@@ -192,11 +187,14 @@ def listing_page(request, item_id):
         {
             "listing": listing,
             "user": user,
-            "seller": User.objects.filter(id=listing.user.id).first(),
             "watching": watching,
             "bform": forms.BidForm(),
-            "current_price": Bids.objects.filter(listing=listing).order_by("-bid_value").first().bid_value,
-            "bids_made": len(Bids.objects.filter(listing=listing))
+            "cform": forms.CommentForm(),
+            "highest_bid": Bids.objects.filter(listing=listing)
+            .order_by("-bid_value")
+            .first(),
+            "bids_made": len(Bids.objects.filter(listing=listing)),
+            "comments": Comments.objects.filter(listing=listing).order_by("-time_sent"),
         },
     )
 
@@ -254,7 +252,7 @@ def bid(request):
             return render(
                 request,
                 "auctions/index.html",
-                {"message": "Invalid request. Please login."},
+                {"message": "Invalid request."},
             )
 
         if user == listing.user:
@@ -263,14 +261,22 @@ def bid(request):
             )
 
         bform = forms.BidForm(request.POST)
+
+        if listing.close_date is not None:
+            return render(
+                request,
+                "auctions/index.html",
+                {"message": "Listing is closed!."},
+            )
+
         if bform.is_valid():
             bid_value = float(request.POST["bid_value"])
-            highest = (
+            highest_bid = (
                 Bids.objects.filter(listing=listing).order_by("-bid_value").first()
             )
             if (
-                highest is None and bid_value > listing.start_price
-            ) or bid_value > float(highest.bid_value):
+                highest_bid is None and bid_value > listing.start_price
+            ) or bid_value > float(highest_bid.bid_value):
                 try:
                     bid = Bids(
                         user=user,
@@ -284,6 +290,14 @@ def bid(request):
                         "auctions/index.html",
                         {
                             "message": "An Integrity error occured, please try again.",
+                        },
+                    )
+                except InvalidOperation:
+                    return render(
+                        request,
+                        "auctions/index.html",
+                        {
+                            "message": "Invalid operation, please try again.",
                         },
                     )
             else:
@@ -304,4 +318,89 @@ def bid(request):
             )
         return HttpResponseRedirect("/" + listing_id)
     # TODO: display user's bids on GET request
-    return HttpResponseRedirect("/")
+    return HttpResponseRedirect(reverse("index"))
+
+
+@login_required(login_url="login")
+def close(request):
+    from datetime import datetime
+
+    if request.method == "POST":
+        try:
+            listing_id = request.POST.get("listing_id")
+            listing = Listings.objects.get(id=listing_id)
+        except Listings.DoesNotExist:
+            return render(
+                request,
+                "auctions/index.html",
+                {"message": "Invalid request."},
+            )
+
+        if request.user.id != listing.user.id:
+            return render(
+                request,
+                "auctions/index.html",
+                {"message": "Invalid request."},
+            )
+
+        if request.POST.get("closed") == "False":
+            try:
+                listing.close_date = datetime.now()
+                listing.save(force_update=True)
+            except IntegrityError:
+                return render(
+                    request,
+                    "auctions/index.html",
+                    {"message": "Auction is already closed"},
+                )
+        else:
+            return render(
+                request,
+                "auctions/index.html",
+                {"message": "Invalid request."},
+            )
+        return HttpResponseRedirect("/" + listing_id)
+    return HttpResponseRedirect(reverse("index"))
+
+
+@login_required(login_url="index")
+def comment(request):
+    if request.method == "POST":
+        cform = forms.CommentForm(request.POST)
+        try:
+            listing_id = request.POST.get("listing_id")
+            listing = Listings.objects.get(id=listing_id)
+            user = User.objects.get(pk=request.user.id)
+        except Listings.DoesNotExist:
+            return render(
+                request,
+                "auctions/index.html",
+                {"message": "Invalid request."},
+            )
+        if cform.is_valid():
+            try:
+                comment_text = request.POST["comment"]
+                comment = Comments(
+                    listing=listing,
+                    user=user,
+                    comment_text=comment_text,
+                )
+                comment.save()
+            except IntegrityError:
+                return render(
+                    request,
+                    "auctions/index.html",
+                    {
+                        "message": "An Integrity error occured, please try again.",
+                    },
+                )
+        else:
+            return render(
+                request,
+                "auctions/index.html",
+                {
+                    "message": "Invalid Form, please try again.",
+                },
+            )
+        return HttpResponseRedirect("/" + listing_id)
+    return HttpResponseRedirect(reverse("index"))

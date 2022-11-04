@@ -1,22 +1,10 @@
-from email.policy import default
-from re import U
 from django.contrib.auth.models import AbstractUser
-from django.db import models
-
-
-from django.contrib.auth.models import AbstractUser
-from django.forms import DateTimeField, DecimalField
 from django.db import models
 
 
 class User(AbstractUser):
     """Custom User model - inherited from Django implementation"""
 
-    balance = DecimalField(
-        decimal_places=2,
-        max_digits=19,
-        min_value=0,
-    )
     cellphone = models.CharField(max_length=30, null=True, blank=True)
     address = models.CharField(max_length=255)
     town = models.CharField(max_length=255)
@@ -39,7 +27,7 @@ class Listings(models.Model):
         default=0.1,
     )
     start_date = models.DateField(auto_now_add=True, blank=True)
-    closed = models.BooleanField(default=False)
+    close_date = models.DateTimeField(null=True, blank=True)
 
 
 class Bids(models.Model):
@@ -56,7 +44,7 @@ class Comments(models.Model):
 
     listing = models.ForeignKey(Listings, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    comment = models.TextField(null=True, blank=True)
+    comment_text = models.TextField(null=True, blank=True)
     time_sent = models.DateTimeField(auto_now_add=True)
 
 

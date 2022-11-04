@@ -3,10 +3,10 @@
 {% block body %}
 
     {% comment %} User is Authenticated {% endcomment %}
-    {% if user.is_authenticated and not listing.closed %}
+    {% if user.is_authenticated and listing.close_date is None %}
 
         {% comment %} User is a Client {% endcomment %}
-        {% if user.id != listing.user.id %}
+        {% if user != listing.user %}
 
             {% comment %}  Watchlist Form {% endcomment %}
             <form action="{% url 'watchlist' %}" method="POST">
@@ -23,7 +23,13 @@
 
         {% comment %} User is Seller {% endcomment %}
         {% else %}
-            {% comment %} close bid {% endcomment %}
+            {% comment %} Close auction Form {% endcomment %}
+            <form action="{% url 'close' %}" method="POST">
+                {% csrf_token %}
+                    <input type="submit" class="btn btn-danger" value="Close Listing">
+                    <input type="hidden" name="closed" value="False">
+                <input type="hidden" name="listing_id" value={{listing.id}}>
+            </form>
         {% endif %}
     {% endif %}
     <h2>{{listing.item_title}}</h2>
@@ -33,40 +39,52 @@
     <div class="container">
         Bids Made: {{bids_made}} 
         Date Started: {{listing.start_date}}
-        Seller: {{seller}}
+        Original Price: {{listing.start_price}}
+        Seller: {{listing.user}}
         Category: {{listing.category}}
         
-        {% comment %} Audition is Closed {% endcomment %}
-        {% if listing.closed %}
-            <h4>Audit Closed!</h4>
-            {% comment %} Closed Data: highest_bid.bid_date {% endcomment %}
-            {% if user.id != highest_bid.user_id %}
-                {% comment %} Sold by highest_bid.bid_value to highest_bid.user_id {% endcomment %}
+        {% comment %} Auction is Closed {% endcomment %}
+        {% if listing.close_date is not None %}
+            <h4>Auction Closed!</h4>
+            Closed on {{listing.close_date}}
+            {% if highest_bid is None %}
+                No winners!
             {% else %}
-                {% comment %} You won with a bid of {{highest_bid.bid_value}}! {% endcomment %}
+                {% if user != highest_bid.user %}
+                    Sold by {{highest_bid.bid_value}} to {{highest_bid.user}}!
+                {% else %}
+                    You won with a bid of {{highest_bid.bid_value}}!
+                {% endif %}
             {% endif %}
         {% else %}
-            Original Price: {{listing.start_price}}
-            Current Price: {{current_price}}
+            Current Price: {{highest_bid.bid_value}}
         {% endif %}
 
     </div>
 
-    {% if user.is_authenticated and not listing.closed %}
-    <div class="container"> 
-        {{user.id}}
-        {{listing.user_id}}
-        {% if user.id != listing.user.id %}
-            <form action="{% url 'bid' %}" method="POST">
+    {% if user.is_authenticated and listing.close_date is None %}
+        <div class="container"> 
+            {% if user != listing.user %}
+                <form action="{% url 'bid' %}" method="POST">
+                    {% csrf_token %}
+                    {{bform}}
+                    <input type="submit" class="btn btn-success" value="make bid">
+                    <input type="hidden" name="listing_id" value={{listing.id}}>
+                </form>
+            {% endif %}
+        </div>
+        <div class="container">
+            <form action="{% url 'comment' %}" method="POST">
                 {% csrf_token %}
-                {{bform}}
-                <input type="submit" class="btn btn-success" value="make bid">
+                {{cform}}
+                <input type="submit" class="btn btn-success" value="comment">
                 <input type="hidden" name="listing_id" value={{listing.id}}>
             </form>
-        {% endif %}
-    </div>
-    <div class="container">
-        {% comment %} Comments Form {% endcomment %}
-    </div>
+        </div>
     {% endif %}
+
+    <h6>Comments:</h6>
+    {% for comment in comments %}
+        <p>{{comment.user}} on {{comment.time_sent}}: {{comment.comment_text}}</p>
+    {% endfor %}
 {% endblock %}

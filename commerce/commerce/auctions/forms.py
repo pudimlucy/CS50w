@@ -1,11 +1,8 @@
-from email.policy import default
-from unicodedata import name
-from attr import attrs
 from django import forms
 from django.forms import NumberInput
 from django.core.validators import RegexValidator
 
-from .models import Bids, User
+from .models import User
 
 
 class CustomRegisterForm(forms.Form):
@@ -59,8 +56,8 @@ class CustomRegisterForm(forms.Form):
         required=False,
         validators=[
             RegexValidator(
-                r"^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$",
-                "Please input a US phone number.",
+                r"^((\+?1-)?\d{3}-)?\d{3}-\d{4}$",
+                "Please input a US phone number. Example: +1 201-555-0123",
             )
         ],
         widget=forms.TextInput(
@@ -269,8 +266,23 @@ class BidForm(forms.Form):
                 "type": "number",
                 "name": "bid_value",
                 "min": "0.01",
+                "max": "99999999999999999.99",
                 "step": "any",
             }
         ),
     )
 
+
+class CommentForm(forms.Form):
+    comment = forms.CharField(
+        label="Make a comment",
+        required=True,
+        widget=forms.Textarea(
+            attrs={
+                "placeholder": "Comment",
+                "class": "form-control",
+                "type": "text",
+                "name": "comment",
+            }
+        ),
+    )
