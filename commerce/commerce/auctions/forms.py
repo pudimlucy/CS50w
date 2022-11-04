@@ -290,6 +290,7 @@ class CommentForm(forms.Form):
         ),
     )
 
+
 class CategoryForm(forms.Form):
     category = forms.ChoiceField(
         label="category",

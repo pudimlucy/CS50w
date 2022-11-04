@@ -412,10 +412,10 @@ def categories(request, category=None):
         if search.is_valid():
             return HttpResponseRedirect(request.POST["category"])
         return render(
-                request,
-                "auctions/index.html",
-                {
-                    "message": "Invalid Form, please try again.",
-                },
-            )
+            request,
+            "auctions/index.html",
+            {
+                "message": "Invalid Form, please try again.",
+            },
+        )
     return HttpResponseRedirect(reverse("index"))
