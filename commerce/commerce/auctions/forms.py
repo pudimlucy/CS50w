@@ -36,7 +36,6 @@ CATEGORIES = (
 
 
 class CustomRegisterForm(forms.Form):
-
     username = forms.CharField(
         label="Username",
         required=True,
@@ -257,7 +256,6 @@ class NewListForm(forms.Form):
 
 
 class BidForm(forms.Form):
-
     bid_value = forms.DecimalField(
         label="Place a Bid",
         required=True,

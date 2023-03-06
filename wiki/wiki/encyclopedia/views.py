@@ -56,7 +56,6 @@ def get_search(request):
     searchform = forms.searchform(request.GET)
 
     if request.method == "GET":
-
         # checks for errors and gets search data.
         if searchform.is_valid():
             search = searchform.cleaned_data["search"].lower()

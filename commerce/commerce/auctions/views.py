@@ -18,7 +18,6 @@ def index(request):
 
 def login_view(request):
     if request.method == "POST":
-
         # Attempt to sign user in
         username = request.POST["username"]
         password = request.POST["password"]
@@ -116,7 +115,6 @@ def register(request):
 
 @login_required(login_url="login")
 def new_listing(request):
-
     if request.method == "POST":
         nlform = forms.NewListForm(request.POST)
 
@@ -202,7 +200,6 @@ def listing_page(request, item_id):
 @login_required(login_url="login")
 def watchlist(request):
     if request.method == "POST":
-
         try:
             listing_id = request.POST.get("listing_id")
             listing = Listing.objects.get(id=listing_id)
