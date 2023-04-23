@@ -13,6 +13,18 @@ from decimal import InvalidOperation
 
 def index(request):
     listings = Listing.objects.filter(close_date=None).order_by("start_date")
+    
+    current_prices = []
+    for listing in listings:
+        highest_bid = Bid.objects.filter(listing=listing).order_by("-bid_value").first()
+        if highest_bid is not None:
+            current_price = getattr(highest_bid, "bid_value")
+        else:
+            current_price = getattr(listing, "start_price")
+        current_prices.append(current_price)
+    
+    listings = zip(listings, current_prices)
+
     return render(request, "auctions/index.html", {"listings": listings})
 
 
@@ -151,7 +163,7 @@ def new_listing(request):
                 {
                     "message": "Invalid Form, please try again.",
                     "nlform": nlform,
-                },
+                }
             )
         return HttpResponseRedirect(reverse("index"))
     return render(request, "auctions/new_listing.html", {"nlform": forms.NewListForm()})
@@ -178,6 +190,14 @@ def listing_page(request, item_id):
             watching = True
     else:
         watching = False
+    
+    # Gets listing's current price
+    highest_bid = Bid.objects.filter(listing=listing).order_by("-bid_value").first()
+    if highest_bid is not None:
+        current_price = getattr(highest_bid, "bid_value")
+    else:
+        current_price = getattr(listing, "start_price")
+    
 
     return render(
         request,
@@ -188,9 +208,8 @@ def listing_page(request, item_id):
             "watching": watching,
             "bform": forms.BidForm(),
             "cform": forms.CommentForm(),
-            "highest_bid": Bid.objects.filter(listing=listing)
-            .order_by("-bid_value")
-            .first(),
+            "highest_bid": highest_bid,
+            "current_price": current_price,
             "bids_made": len(Bid.objects.filter(listing=listing)),
             "comments": Comment.objects.filter(listing=listing).order_by("-time_sent"),
         },
@@ -271,38 +290,45 @@ def bid(request):
             highest_bid = (
                 Bid.objects.filter(listing=listing).order_by("-bid_value").first()
             )
-            if (
-                highest_bid is None and bid_value > listing.start_price
-            ) or bid_value > float(highest_bid.bid_value):
-                try:
-                    bid = Bid(
-                        user=user,
-                        listing=listing,
-                        bid_value=bid_value,
-                    )
-                    bid.save()
-                except IntegrityError:
+            if highest_bid is not None:
+                if bid_value < float(highest_bid.bid_value):
                     return render(
-                        request,
-                        "auctions/index.html",
-                        {
-                            "message": "An Integrity error occured, please try again.",
-                        },
-                    )
-                except InvalidOperation:
-                    return render(
-                        request,
-                        "auctions/index.html",
-                        {
-                            "message": "Invalid operation, please try again.",
-                        },
-                    )
-            else:
-                return render(
                     request,
                     "auctions/index.html",
                     {
                         "message": "Please bid a value higher than the listing's current value.",
+                    },
+                )
+            else:
+                if bid_value < listing.start_price:
+                    return render(
+                    request,
+                    "auctions/index.html",
+                    {
+                        "message": "Please bid a value higher than the listing's current value.",
+                    },
+                )
+            try:
+                bid = Bid(
+                    user=user,
+                    listing=listing,
+                    bid_value=bid_value,
+                )
+                bid.save()
+            except IntegrityError:
+                return render(
+                    request,
+                    "auctions/index.html",
+                    {
+                        "message": "An Integrity error occured, please try again.",
+                    },
+                )
+            except InvalidOperation:
+                return render(
+                    request,
+                    "auctions/index.html",
+                    {
+                        "message": "Invalid operation, please try again.",
                     },
                 )
         else:

@@ -7,7 +7,7 @@
         {{message}}
     {% endif %}
 
-    {% for listing in listings %}
+    {% for listing, current_price in listings %}
         {% if listing.close_date is None %}
             <div class="container">
                 <a href="{% url 'listing_page' item_id=listing.id %}">
@@ -22,7 +22,7 @@
                             <i>Description:</i> <i>{{listing.description}}</i>
                         </div>
                         <div>
-                            <strong>Price:</strong> {{listing.current_price}}$
+                            <strong>Price:</strong> {{current_price}}$
                         </div>
                         <div class="container">
                             <strong>Category:</strong> {{listing.category}}
