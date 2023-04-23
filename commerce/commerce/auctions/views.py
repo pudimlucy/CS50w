@@ -13,7 +13,7 @@ from decimal import InvalidOperation
 
 def index(request):
     listings = Listing.objects.filter(close_date=None).order_by("start_date")
-    
+
     current_prices = []
     for listing in listings:
         highest_bid = Bid.objects.filter(listing=listing).order_by("-bid_value").first()
@@ -22,10 +22,10 @@ def index(request):
         else:
             current_price = getattr(listing, "start_price")
         current_prices.append(current_price)
-    
-    listings = zip(listings, current_prices)
 
-    return render(request, "auctions/index.html", {"listings": listings})
+    return render(
+        request, "auctions/index.html", {"listings": zip(listings, current_prices)}
+    )
 
 
 def login_view(request):
@@ -163,7 +163,7 @@ def new_listing(request):
                 {
                     "message": "Invalid Form, please try again.",
                     "nlform": nlform,
-                }
+                },
             )
         return HttpResponseRedirect(reverse("index"))
     return render(request, "auctions/new_listing.html", {"nlform": forms.NewListForm()})
@@ -190,14 +190,13 @@ def listing_page(request, item_id):
             watching = True
     else:
         watching = False
-    
+
     # Gets listing's current price
     highest_bid = Bid.objects.filter(listing=listing).order_by("-bid_value").first()
     if highest_bid is not None:
         current_price = getattr(highest_bid, "bid_value")
     else:
         current_price = getattr(listing, "start_price")
-    
 
     return render(
         request,
@@ -293,21 +292,21 @@ def bid(request):
             if highest_bid is not None:
                 if bid_value < float(highest_bid.bid_value):
                     return render(
-                    request,
-                    "auctions/index.html",
-                    {
-                        "message": "Please bid a value higher than the listing's current value.",
-                    },
-                )
+                        request,
+                        "auctions/index.html",
+                        {
+                            "message": "Please bid a value higher than the listing's current value.",
+                        },
+                    )
             else:
                 if bid_value < listing.start_price:
                     return render(
-                    request,
-                    "auctions/index.html",
-                    {
-                        "message": "Please bid a value higher than the listing's current value.",
-                    },
-                )
+                        request,
+                        "auctions/index.html",
+                        {
+                            "message": "Please bid a value higher than the listing's current value.",
+                        },
+                    )
             try:
                 bid = Bid(
                     user=user,
@@ -429,16 +428,35 @@ def comment(request):
     return HttpResponseRedirect(reverse("index"))
 
 
-def categories(request, category=None):
-    if request.method == "POST":
-        search = forms.CategoryForm(request.POST)
-        if search.is_valid():
-            return HttpResponseRedirect(request.POST["category"])
-        return render(
-            request,
-            "auctions/index.html",
-            {
-                "message": "Invalid Form, please try again.",
-            },
-        )
-    return HttpResponseRedirect(reverse("index"))
+@login_required(login_url="login")
+def categories(request):
+    name = []
+    symbol = []
+    for category in forms.CATEGORIES:
+        symbol.append(category[0])
+        name.append(category[1])
+    return render(
+        request, "auctions/categories.html", {"categories": zip(symbol, name)}
+    )
+
+
+@login_required(login_url="login")
+def categories_page(request, category):
+    listings = Listing.objects.filter(close_date=None, category=category).order_by(
+        "start_date"
+    )
+
+    current_prices = []
+    for listing in listings:
+        highest_bid = Bid.objects.filter(listing=listing).order_by("-bid_value").first()
+        if highest_bid is not None:
+            current_price = getattr(highest_bid, "bid_value")
+        else:
+            current_price = getattr(listing, "start_price")
+        current_prices.append(current_price)
+
+    return render(
+        request,
+        "auctions/categories.html",
+        {"category": category, "listings": zip(listings, current_prices)},
+    )

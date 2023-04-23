@@ -3,16 +3,16 @@
 {% block body %}
     <h2>Search by Category</h2>
 
-    <div class="container">
-        <form action="{% url 'categories' %}" method="POST">
-            {% csrf_token %}
-            {{categories}}
-            <input type="submit" class="btn btn-success" value="search">
-        </form>
-    </div>
-
-        <h3>Results: </h3>
-        {% for listing in listings %}
+    {% if categories is not None %}
+        <ul>
+            {% for symbol, name in categories %}
+            <li>
+                <a href="{% url 'categories_page' category=symbol %}">{{name}}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    {% elif category is not None %}
+        {% for listing, current_price in listings %}
             {% if listing.close_date is None %}
                 <div class="container">
                     <a href="{% url 'listing_page' item_id=listing.id %}">
@@ -27,7 +27,7 @@
                                 <i>Description:</i> <i>{{listing.description}}</i>
                             </div>
                             <div>
-                                <strong>Price:</strong> {{listing.current_price}}$
+                                <strong>Price:</strong> {{current_price}}$
                             </div>
                             <div class="container">
                                 <strong>Category:</strong> {{listing.category}}
@@ -39,7 +39,6 @@
                     </a>
                 </div>
             {% endif %}
-        {% empty %}
-                No items.
         {% endfor %}
+    {% endif %}    
 {% endblock %}

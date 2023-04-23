@@ -287,18 +287,3 @@ class CommentForm(forms.Form):
             }
         ),
     )
-
-
-class CategoryForm(forms.Form):
-    category = forms.ChoiceField(
-        label="category",
-        required=False,
-        choices=CATEGORIES,
-        widget=forms.Select(
-            attrs={
-                "class": "form-control",
-                "type": "text",
-                "name": "category",
-            }
-        ),
-    )
