@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
   load_mailbox('inbox');
 });
 
-function compose_email() {
+function compose_email(is_reply=false, id) {
 
   // Show compose view and hide other views
   document.querySelector('#compose-view').style.display = 'block';
@@ -22,6 +22,18 @@ function compose_email() {
   document.querySelector('#compose-recipients').value = '';
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
+
+  // checks if it's a reply
+  if (is_reply) {
+    // Fetches original email
+    fetch('/emails/' + id)
+    .then(response => response.json())
+    .then(email => {
+      // Prepopulates fields with appropriate values
+      document.querySelector('#compose-recipients').value = email.recipients;
+      document.querySelector('#compose-subject').value = (email.subject.slice(0, 4) === 'Re: ') ? email.subject : `Re: ${email.subject}`;
+      document.querySelector('#compose-body').value = `>> On ${email.timestamp}, ${email.sender} wrote: \n\n > ${email.body} \n\n`;
+  });}
 }
 
 function load_mailbox(mailbox) {
@@ -39,7 +51,7 @@ function load_mailbox(mailbox) {
   .then(response => response.json())
   .then(emails => {
     emails.forEach(email => {
-      let div = document.createElement('div');
+      const div = document.createElement('div');
       div.style.border = 'thin solid black';
       if (email['read']) {
         div.style.backgroundColor = 'grey'
@@ -51,8 +63,9 @@ function load_mailbox(mailbox) {
           <li><b>Time: ${email['timestamp']}</b></li>
         </ul>
       `;
+
       // Adds event listener to display email
-      div.addEventListener('click', () => view_email(email['id']))
+      div.addEventListener('click', () => view_email(email['id'], mailbox))
       document.querySelector('#emails-view').append(div);
     });
   });
@@ -71,16 +84,13 @@ function send_email(event) {
       subject: document.querySelector('#compose-subject').value,
       body: document.querySelector('#compose-body').value
     })
-  })
+  });
 
   // Displays sent mailbox
-  .then(response => response.json())
-  .then(response => {
-    load_mailbox('sent');
-  });
+  load_mailbox('sent');
 }
 
-function view_email(id) {
+function view_email(id, mailbox) {
 
   // Shows email view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
@@ -94,6 +104,7 @@ function view_email(id) {
 
     // Displays email's content
     document.querySelector('#email-view').innerHTML = `
+    <div id="buttons"></div>
     <ul>
       <li><b>From: ${email['sender']}</b></li>
       <li><b>To: ${email['recipients']}</b></li>
@@ -112,25 +123,49 @@ function view_email(id) {
         })
       })      
     }
-  })
 
-  // TODO: create archive, unarchive, reply buttons
+    if (mailbox != 'sent') {
+      // Creates archive/unarchive button
+      const archiveButton = document.createElement('button');
+      archiveButton.type = 'button';
+      archiveButton.innerHTML = (email.archived == false) ? 'Archive' : 'Unarchive';
+
+      // Appends archive/unarchive button to buttons div
+      document.querySelector('#buttons').append(archiveButton);
+
+      // Adds event listener to archive/unarchive email
+      archiveButton.addEventListener('click', () => archive_unarchive(email['id']))
+
+      // Creates reply button
+      const replyButton = document.createElement('button');
+      replyButton.type = 'button';
+      replyButton.innerHTML = 'Reply';
+
+      // Appends reply button to buttons div
+      document.querySelector('#buttons').append(replyButton);
+
+      // Adds event listener to reply to email
+      replyButton.addEventListener('click', () => compose_email(true, email['id']))
+    }
+  });
 }
 
-function archive () {
-  // TODO: archive or unarchive emails
-  // check if email is archived or not
-  // PUT request to /emails/<email_id> to update archived property accordingly
+function archive_unarchive (id) {
 
-  // loads user's inbox
+  // Fetches email
+  fetch('/emails/' + id)
+  .then(response => response.json())
+  .then(email => {
+    // Updates email's archived property
+    fetch('/emails/' + email['id'], {
+      method: 'PUT',
+      body: JSON.stringify({
+        // If archived, unarchive email; if unarchived, archive email
+        archived: (email.archived == false)
+      })
+    })      
+  });
+
+  // Loads user's inbox
   load_mailbox('inbox');
-}
-
-function reply () {
-  // TODO: allow users to reply to an email
-  // show compose-view, hide emails-view and email-view
-  // pre-fill recipient field with sender of original email
-  // if the original subject doens't starts with "Re: ":
-  // pre-fill subject field with "Re: <original subject>"
-  // pre-fill body with "On <timestamp>, <sender> wrote:"<original body>
 }
