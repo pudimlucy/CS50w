@@ -1,6 +1,7 @@
 import json
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
+from django.http import JsonResponse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -100,3 +101,15 @@ def new_post(request):
         return HttpResponseRedirect(reverse("index"))
     # Renders new post page
     return render(request, "network/new_post.html", {"npform": NewPostForm()})
+
+def display_posts(request, posts):
+    # Gets filtered posts
+    if posts == "all":
+        posts = Post.objects.all()
+    
+    # Returns posts
+    return JsonResponse([post.serialize() for post in posts], safe=False)
+
+# def display_post(request, post_id):
+#     # TODO: display specific post
+#     ...
