@@ -1,0 +1,22 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+    {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+    <form action="{% url 'new_post' %}" method="post">
+        <div class="form-group p-3 border">
+            {% csrf_token %}
+            {% for field in npform %}
+                <b><label for="{{ field.auto_id }}">{{ field.label }}</label></b>
+                {{ field }}
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Post</button>
+        </div>
+    </form>
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'network/network.js' %}"></script>
+{% endblock %}
