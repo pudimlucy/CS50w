@@ -12,12 +12,11 @@ function display_posts(posts) {
       // TODO: edit, like and dislike buttons
       posts.forEach(post => {
         const div = document.createElement('div');
-        div.style.class = 'card mb-3';
         div.innerHTML = `
-        <div class="card-body" data-post_id="${post['id']}"
-            <h5 class="card-title">${post['author']}</h5>
+        <div class="card-body border border-1" data-post_id="${post['id']}">
+            <strong><h5 class="card-title">${post['author']}</h5></strong>
             <div class="card-text">${post['content']}
-            <h6 class="card-subtitle text-muted">${post['date']}</h6>
+            <em><h6 class="card-subtitle text-muted">${post['date']}</h6></em>
         </div>
       `;
 
