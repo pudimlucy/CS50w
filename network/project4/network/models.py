@@ -4,6 +4,18 @@ from django.conf import settings
 
 
 class User(AbstractUser):
+    def serialize(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "date_joined": self.date_joined,
+            "nfollowing": len(self.follows()),
+            "nfollowers": len(self.followers()),
+        }
+    def follows(self):
+        return UserFollowing.objects.filter(follower=self)
+    def followers(self):
+        return UserFollowing.objects.filter(following=self)
     pass
 
 
@@ -25,3 +37,7 @@ class Post(models.Model):
             "content": self.content,
             "date": self.date,
         }
+
+class UserFollowing(models.Model):
+    follower = models.ForeignKey(User, related_name="follower", on_delete=models.CASCADE)
+    following = models.ForeignKey(User, related_name="following", on_delete=models.CASCADE)

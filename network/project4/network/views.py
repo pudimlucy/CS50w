@@ -106,10 +106,13 @@ def display_posts(request, posts):
     # Gets filtered posts
     if posts == "all":
         posts = Post.objects.all()
+    elif "user-" in posts:
+        user = User.objects.filter(username=posts.split("-")[1])
+        posts = Post.objects.filter(author=user[0])
     
     # Returns posts
     return JsonResponse([post.serialize() for post in posts], safe=False)
 
-# def display_post(request, post_id):
-#     # TODO: display specific post
-#     ...
+def get_user(request, username):
+    user = User.objects.filter(username=username).first()
+    return JsonResponse(user.serialize(), safe=False)
