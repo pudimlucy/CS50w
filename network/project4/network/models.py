@@ -9,13 +9,16 @@ class User(AbstractUser):
             "id": self.id,
             "username": self.username,
             "date_joined": self.date_joined,
-            "nfollowing": len(self.follows()),
-            "nfollowers": len(self.followers()),
+            "following": len(self.follows()),
+            "followers": len(self.followers()),
         }
+
     def follows(self):
-        return UserFollowing.objects.filter(follower=self)
+        return UserFollowing.objects.filter(follower=self).all()
+
     def followers(self):
-        return UserFollowing.objects.filter(following=self)
+        return UserFollowing.objects.filter(following=self).all()
+
     pass
 
 
@@ -29,7 +32,7 @@ class Post(models.Model):
 
     def __str__(self):
         return self.content
-    
+
     def serialize(self):
         return {
             "id": self.id,
@@ -38,6 +41,11 @@ class Post(models.Model):
             "date": self.date,
         }
 
+
 class UserFollowing(models.Model):
-    follower = models.ForeignKey(User, related_name="follower", on_delete=models.CASCADE)
-    following = models.ForeignKey(User, related_name="following", on_delete=models.CASCADE)
+    follower = models.ForeignKey(
+        User, related_name="follower", on_delete=models.CASCADE
+    )
+    following = models.ForeignKey(
+        User, related_name="following", on_delete=models.CASCADE
+    )

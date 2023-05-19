@@ -1,0 +1,19 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+    <div id="profile">
+        {% comment %}
+        TODO:
+        1. number of followers
+        2. number of follows 
+        3. follow/unfollow button
+        {% endcomment %}
+    </div>
+    <div id="view-user">
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'network/network.js' %}"></script>
+{% endblock %}

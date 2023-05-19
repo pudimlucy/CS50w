@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import JsonResponse
 from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.urls import reverse
 
@@ -67,6 +68,7 @@ def register(request):
         return render(request, "network/register.html")
 
 
+@login_required(login_url="login")
 def new_post(request):
     # Checks for method
     if request.method == "POST":
@@ -102,17 +104,29 @@ def new_post(request):
     # Renders new post page
     return render(request, "network/new_post.html", {"npform": NewPostForm()})
 
-def display_posts(request, posts):
+
+def display_posts(request, filter):
     # Gets filtered posts
-    if posts == "all":
+    if filter == "all":
         posts = Post.objects.all()
-    elif "user-" in posts:
-        user = User.objects.filter(username=posts.split("-")[1])
-        posts = Post.objects.filter(author=user[0])
-    
+    else:
+        user = User.objects.filter(username=filter).first()
+        posts =Post.objects.filter(author=user.id)
+
     # Returns posts
     return JsonResponse([post.serialize() for post in posts], safe=False)
+
 
 def get_user(request, username):
     user = User.objects.filter(username=username).first()
     return JsonResponse(user.serialize(), safe=False)
+
+
+@login_required(login_url="login")
+def view_profile(request, username):
+    user = User.objects.filter(username=username).first()
+    if user is None:
+        return HttpResponseRedirect(reverse("index"))
+
+    if request.user.is_authenticated:
+        return render(request, "network/user.html")
