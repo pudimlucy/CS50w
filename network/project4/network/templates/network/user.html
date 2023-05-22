@@ -2,16 +2,31 @@
 {% load static %}
 
 {% block body %}
-    <div id="profile">
-        {% comment %}
-        TODO:
-        1. number of followers
-        2. number of follows 
-        3. follow/unfollow button
-        {% endcomment %}
-    </div>
-    <div id="view-user">
-    </div>
+    {% if user.is_authenticated %}
+        <div id="profile">
+            {{ profile.username }}
+            following: {{ nfollowing }}
+            followers: {{ nfollowers }}
+            date joined: {{ profile.date_joined }}
+        </div>
+        {% if user.id != profile.id %}
+            <div id="follow-form">
+                <form action="{% url 'follow' %}" method="POST">
+                    {% csrf_token %}
+                    {% if following %}
+                        <input type="submit" class="btn btn-danger" value="Unfollow">
+                        <input type="hidden" name="following" value="True">
+                    {% else %}
+                        <input type="submit" class="btn btn-success" value="Follow">
+                        <input type="hidden" name="following" value="False">
+                    {% endif %}
+                    <input type="hidden" name="profile_id" value={{profile.id}}>
+                </form>
+            </div>
+        {% endif %}
+        <div id="view-user">
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block script %}

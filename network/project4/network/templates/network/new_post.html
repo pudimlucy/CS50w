@@ -2,9 +2,11 @@
 {% load static %}
 
 {% block body %}
-    {% if message %}
-        <div>{{ message }}</div>
-    {% endif %}
+    <div id="message">
+        {% if message %}
+            {{ message }}
+        {% endif %}
+    </div>
     <form action="{% url 'new_post' %}" method="post">
         <div class="form-group p-3 border">
             {% csrf_token %}

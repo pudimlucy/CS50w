@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Post
+from .models import User, Post, UserFollowing
 from .forms import NewPostForm
 
 
@@ -111,7 +111,7 @@ def display_posts(request, filter):
         posts = Post.objects.all()
     else:
         user = User.objects.filter(username=filter).first()
-        posts =Post.objects.filter(author=user.id)
+        posts = Post.objects.filter(author=user.id)
 
     # Returns posts
     return JsonResponse([post.serialize() for post in posts], safe=False)
@@ -124,9 +124,60 @@ def get_user(request, username):
 
 @login_required(login_url="login")
 def view_profile(request, username):
-    user = User.objects.filter(username=username).first()
-    if user is None:
+    profile = User.objects.filter(username=username).first()
+    user = User.objects.get(pk=request.user.id)
+    if profile is None:
         return HttpResponseRedirect(reverse("index"))
+    
+    if request.user.is_authenticated:
+        relation = UserFollowing.objects.filter(follower=user, following=profile).first()
+        following = False if relation is None else True
+    else:
+        following = False
 
     if request.user.is_authenticated:
-        return render(request, "network/user.html")
+        return render(
+            request,
+            "network/user.html",
+            {
+                "user": user,
+                "profile": profile,
+                "nfollowing": len(profile.follows()),
+                "nfollowers": len(profile.followers()),
+                "following": following,
+            },
+        )
+
+@login_required(login_url="login")
+def follow(request):
+    if request.method == "POST":
+        profile = request.POST.get("profile_id")
+        profile = User.objects.filter(id=profile).first()
+        if profile is None:
+            return HttpResponseRedirect(reverse("index"))
+        user = User.objects.get(pk=request.user.id)
+
+        if request.POST.get("following") == "True":
+            relation = UserFollowing.objects.filter(
+                follower = user,
+                following = profile,
+            ).first()
+            relation.delete()
+        else:
+            try:
+                relation = UserFollowing(
+                    follower = user,
+                    following = profile,
+                )
+                relation.save()
+            except IntegrityError:
+                return render(
+                request,
+                "network/index.html",
+                {
+                    "message": "An Integrity error occured, please try again.",
+                },
+            )
+        return HttpResponseRedirect("/profile/" + profile.username)
+    else:
+        return HttpResponseRedirect(reverse("index"))

@@ -59,7 +59,6 @@ function display_user_posts(username) {
 }
 
 function get_user(username){
-  // TODO: 
   fetch('/user/'+username)
   .then(response => response.json())
   .then(user => {

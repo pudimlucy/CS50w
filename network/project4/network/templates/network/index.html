@@ -2,6 +2,11 @@
 {% load static %}
 
 {% block body %}
+    <div id="message">
+        {% if message %}
+            {{ message }}
+        {% endif %}
+    </div>
     <div id="view-all">
     </div>
 {% endblock %}
