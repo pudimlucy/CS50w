@@ -121,15 +121,19 @@ def get_user(request, username):
     user = User.objects.filter(username=username).first()
     return JsonResponse(user.serialize(), safe=False)
 
-def get_follows(request, username):
+
+def get_following_posts(request, username):
     user = User.objects.filter(username=username).first()
     relations = UserFollowing.objects.filter(follower=user).all()
 
     profiles = []
     for relation in relations:
-        profiles.append(User.objects.filter(id=relation.following.id).first())
+        profiles.append(relation.following.id)
 
-    return JsonResponse([profile.serialize() for profile in profiles], safe=False)
+    profiles = User.objects.filter(pk__in=profiles).all()
+    posts = Post.objects.filter(author__in=profiles).order_by("-date")
+
+    return JsonResponse([post.serialize() for post in posts], safe=False)
 
 
 @login_required(login_url="login")
@@ -195,9 +199,10 @@ def follow(request, username=None):
     else:
         return HttpResponseRedirect(reverse("index"))
 
+
 @login_required(login_url="login")
 def following(request, username):
     return render(
-            request,
-            "network/following.html",
-        )
+        request,
+        "network/following.html",
+    )
