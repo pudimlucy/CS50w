@@ -3,9 +3,9 @@ document.addEventListener('DOMContentLoaded', function () {
   if (window.location.pathname === "/") {
     display_posts("#view-all", "/posts/all");
   } else if (window.location.pathname.substring(0, 9) === "/profile/") {
-    display_posts("#view-user", "/posts/", (window.location.pathname.substring(9, )));
+    display_posts("#view-user", "/posts/", (window.location.pathname.substring(9,)));
   } else if (window.location.pathname.substring(0, 11) === "/following/") {
-    display_posts("#view-following", "/follows/", (window.location.pathname.substring(11, )));
+    display_posts("#view-following", "/follows/", (window.location.pathname.substring(11,)));
   }
 });
 
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
  * @param   href The link from which the posts must be fetched.
  * @param   username Username for user-specific pages (following and profile).
  */
-function display_posts(selector, href, username="") {
+function display_posts(selector, href, username = "") {
   fetch(href + username)
     .then(response => response.json())
     .then(posts => {
