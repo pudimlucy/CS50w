@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', function () {
-  document.querySelector('#all-posts').addEventListener('click', () => display_all());
+  document.querySelector('#all-posts').addEventListener('click', () => display_posts("#view-all", "/posts"));
   if (window.location.pathname === "/") {
-    display_posts("#view-all", "/posts/all");
+    display_posts("#view-all", "/posts");
   } else if (window.location.pathname.substring(0, 9) === "/profile/") {
-    display_posts("#view-user", "/posts/", (window.location.pathname.substring(9,)));
+    display_posts("#view-user", "/userposts/", (window.location.pathname.substring(9,)));
   } else if (window.location.pathname.substring(0, 11) === "/following/") {
     display_posts("#view-following", "/follows/", (window.location.pathname.substring(11,)));
   }

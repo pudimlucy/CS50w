@@ -105,14 +105,16 @@ def new_post(request):
     return render(request, "network/new_post.html", {"npform": NewPostForm()})
 
 
-def get_posts(request, filter):
-    # Gets filtered posts
-    if filter == "all":
-        posts = Post.objects.all()
-    else:
-        user = User.objects.filter(username=filter).first()
-        posts = Post.objects.filter(author=user.id)
+def get_all_posts(request):
+    # Gets posts
+    posts = Post.objects.all()
+    # Returns posts
+    return JsonResponse([post.serialize() for post in posts], safe=False)
 
+def get_user_posts(request, username):
+    # Gets user's posts
+    user = User.objects.filter(username=username).first()
+    posts = Post.objects.filter(author=user.id)
     # Returns posts
     return JsonResponse([post.serialize() for post in posts], safe=False)
 
@@ -137,7 +139,7 @@ def get_following_posts(request, username):
 
 
 @login_required(login_url="login")
-def view_profile(request, username):
+def profile_view(request, username):
     profile = User.objects.filter(username=username).first()
     user = User.objects.get(pk=request.user.id)
     if profile is None:
@@ -166,7 +168,7 @@ def view_profile(request, username):
 
 
 @login_required(login_url="login")
-def follow(request, username=None):
+def follow(request):
     if request.method == "POST":
         profile = request.POST.get("profile_id")
         profile = User.objects.filter(id=profile).first()
@@ -201,7 +203,7 @@ def follow(request, username=None):
 
 
 @login_required(login_url="login")
-def following(request, username):
+def following_view(request, username):
     return render(
         request,
         "network/following.html",
