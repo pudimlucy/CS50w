@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelector('#all-posts').addEventListener('click', () => display_all());
   if (window.location.pathname === "/") {
-    display_posts(selector="#view-all", "/posts/all");
+    display_posts("#view-all", "/posts/all");
   } else if (window.location.pathname.substring(0, 9) === "/profile/") {
     display_posts("#view-user", "/posts/", (window.location.pathname.substring(9, )));
   } else if (window.location.pathname.substring(0, 11) === "/following/") {
