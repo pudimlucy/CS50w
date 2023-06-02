@@ -24,8 +24,15 @@
                 </form>
             </div>
         {% endif %}
+        <div id="message">
+            {% if message %}
+                {{ message }}
+            {% endif %}
+        </div>
         <div id="view-user">
         </div>
+        <nav aria-label="Navigation" id="navigation">
+        </nav>
     {% endif %}
 {% endblock %}
 

@@ -111,6 +111,7 @@ def get_all_posts(request):
     # Returns posts
     return JsonResponse([post.serialize() for post in posts], safe=False)
 
+
 def get_user_posts(request, username):
     # Gets user's posts
     user = User.objects.filter(username=username).first()
@@ -182,7 +183,7 @@ def follow(request):
                 following=profile,
             ).first()
             relation.delete()
-        else:
+        elif user != profile:
             try:
                 relation = UserFollowing(
                     follower=user,
@@ -197,6 +198,8 @@ def follow(request):
                         "message": "An Integrity error occured, please try again.",
                     },
                 )
+        else:
+            return HttpResponseRedirect(reverse("index"))
         return HttpResponseRedirect("/profile/" + profile.username)
     else:
         return HttpResponseRedirect(reverse("index"))
