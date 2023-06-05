@@ -207,6 +207,10 @@ def follow(request):
 
 @login_required(login_url="login")
 def following_view(request, username):
+    profile = User.objects.filter(username=username).first()
+    user = User.objects.get(pk=request.user.id)
+    if profile is None or profile != user:
+        return HttpResponseRedirect(reverse("index"))
     return render(
         request,
         "network/following.html",

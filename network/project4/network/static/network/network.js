@@ -22,32 +22,37 @@ function display_posts(selector, href, username = "") {
     .then(posts => {
       if (posts.length > 0) {
         pages = Math.ceil(posts.length / 10)
-        create_nav(pages);
+        nav_template(pages);
+        page_buttons();
+        move_buttons();
         create_pages(pages, selector);
         append_posts(posts);
       } else {
         document.querySelector("#message").innerHTML = `
         <div class="alert alert-warning" role="alert">
           No posts here yet!
-        </div>`
+        </div>`;
       }
     });
 }
 
 /**
- * Appends a post to a selected element.
+ * Appends posts to pages.
  *
- * @param   post  A JSON response containing the post's data: id, author, content and publication date.
- * @param   selector The selector specifying where the content must be appended.
+ * @param   posts  An iterable containing the JSON responses of posts to be appended.
  */
 function append_posts(posts) {
+  // Counts index 
   index = 0;
   posts.forEach(post => {
+    // Defines page to append the post, given 10 posts per page
     page = Math.floor(index / 10) + 1;
+
+    // Creates a div to post and adds an event listener to display user's profile
     const div = create_post_div(post);
     add_user_redirect(div, post);
 
-    // Appends post to proper selector
+    // Appends post to proper page
     document.querySelector("#page-view-" + page).append(div);
     index++;
   });
@@ -64,12 +69,12 @@ function create_post_div(post) {
   const div = document.createElement('div');
   div.innerHTML += `
   <div class="card-body border border-1 post" data-post_id="${post['id']}" id="${post['id']}">
-    <strong><h5 class="card-title" href="user/${post['author']}">${post['author']}</h5></strong>
+    <strong><h5 class="card-title" href="/profile/${post['author']}">${post['author']}</h5></strong>
     <div class="card-text">${post['content']}
     <em><h6 class="card-subtitle text-muted">${post['date']}</h6></em>
   </div>
   `;
-  return div
+  return div;
 }
 
 // TODO: specify event listener to trigger when click on USERNAME, not the div.
@@ -86,10 +91,16 @@ function add_user_redirect(div, post) {
       .then(user => {
         window.location.replace('/profile/' + user['username']);
       });
-  })
+  });
 }
 
-function create_nav(pages) {
+/**
+ * Creates pagination nav template.
+ *
+ * @param   pages  Quantity of pages.
+ */
+function nav_template(pages) {
+  // Creates pagination container and previous/next buttons
   document.querySelector("#navigation").innerHTML = `
   <ul class="pagination">
       <li class="page-item"><a class="page-link" id="previous">Previous</a></li>
@@ -99,54 +110,76 @@ function create_nav(pages) {
       </div>
       <li class="page-item"><a class="page-link" id="next">Next</a></li>
   </ul>
-  `
+  `;
+
+  // For each page, creates a page button
   for (let i = 1; i <= pages; i++) {
     const li = document.createElement("li");
     li.classList.add("page-item", "page-number");
-    li.id = "page-" + i
+    li.id = "page-" + i;
     li.innerHTML = `
     <a class="page-link">${i}</a>
     `;
     document.querySelector("#pagination").append(li);
   }
   document.querySelector("#page-1").classList.add("active");
+}
 
+/**
+ * Adds event listeners to page buttons.
+ */
+function page_buttons() {
   document.querySelectorAll(".page-number").forEach(page => {
     page.addEventListener("click", () => {
+      const num = page.id.substring(5);
       document.querySelector(".active").classList.remove("active");
       page.classList.add("active");
       document.querySelector(".page-view[style*='block']").style.display = "none";
-      const num = page.id.substring(5);
       document.querySelector("#page-view-" + num).style.display = "block";
     });
   });
+}
 
+/**
+ * Adds event listeners to previous and next buttons.
+ */
+function move_buttons() {
+  const num = Number(document.querySelector(".active").id.substring(5));
   document.querySelector("#previous").addEventListener("click", () => {
-    const num = Number(document.querySelector(".active").id.substring(5)) - 1
-    if (num >= 1) {
-      document.querySelector(".active").classList.remove("active");
-      document.querySelector("#page-" + num).classList.add("active");
-      document.querySelector(".page-view[style*='block']").style.display = "none";
-      document.querySelector("#page-view-" + num).style.display = "block";
+    if (num - 1 >= 1) {
+      hide_and_show_pages(num - 1);
     }
   });
+
   document.querySelector("#next").addEventListener("click", () => {
-    const num = Number(document.querySelector(".active").id.substring(5)) + 1
-    if (num <= document.querySelectorAll(".page-number").length) {
-      document.querySelector(".active").classList.remove("active");
-      document.querySelector("#page-" + num).classList.add("active");
-      document.querySelector(".page-view[style*='block']").style.display = "none";
-      document.querySelector("#page-view-" + num).style.display = "block";
+    if (num + 1 <= document.querySelectorAll(".page-number").length) {
+      hide_show_pages(num + 1);
     }
   });
 }
 
+/**
+ * Handles page display.
+ * @param   num Number of the page to be displayed.
+ */
+function hide_show_pages(num) {
+  document.querySelector(".active").classList.remove("active");
+  document.querySelector("#page-" + num).classList.add("active");
+  document.querySelector(".page-view[style*='block']").style.display = "none";
+  document.querySelector("#page-view-" + num).style.display = "block";
+}
+
+/**
+ * Creates page divs.
+ * @param   pages Number of pages.
+ * @param   selector View div to append pages.
+ */
 function create_pages(pages, selector) {
   for (let i = 1; i <= pages; i++) {
     const div = document.createElement("div");
     div.style.display = "none";
     div.classList.add("page-view");
-    div.id = "page-view-" + i
+    div.id = "page-view-" + i;
     document.querySelector(selector).append(div);
   }
   document.querySelector("#page-view-1").style.display = "block";
