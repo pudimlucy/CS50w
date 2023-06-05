@@ -50,6 +50,7 @@ function append_posts(posts) {
 
     // Creates a div to post and adds an event listener to display user's profile
     const div = create_post_div(post);
+    create_edit_button(div, post);
     add_user_redirect(div, post);
 
     // Appends post to proper page
@@ -67,31 +68,27 @@ function append_posts(posts) {
  */
 function create_post_div(post) {
   const div = document.createElement('div');
+  div.classList.add("card-body", "border", "border-1", "post");
+  div.id = post["id"]
   div.innerHTML += `
-  <div class="card-body border border-1 post" data-post_id="${post['id']}" id="${post['id']}">
-    <strong><h5 class="card-title" href="/profile/${post['author']}">${post['author']}</h5></strong>
-    <div class="card-text">${post['content']}
-    <em><h6 class="card-subtitle text-muted">${post['date']}</h6></em>
-  </div>
+  <strong><h5 class="card-title" href="/profile/${post['author']}">${post['author']}</h5></strong>
+  <div class="card-text">${post['content']}
+  <em><h6 class="card-subtitle text-muted">${post['date']}</h6></em>
   `;
+  
   return div;
 }
 
-// TODO: specify event listener to trigger when click on USERNAME, not the div.
 /**
- * Adds an event listener to a post that redirects to author's profile.
+ * Adds an event listener to a post's title that redirects to author's profile.
  *
  * @param   div  A div containg the post template.
  * @param   post A JSON response containing the post's data: id, author, content and publication date.
  */
 function add_user_redirect(div, post) {
-  div.addEventListener('click', () => {
-    fetch('/user/' + post['author'])
-      .then(response => response.json())
-      .then(user => {
-        window.location.replace('/profile/' + user['username']);
-      });
-  });
+  div.children[0].addEventListener('click', () => {
+    window.location.replace('/profile/' + post['author']);
+  })
 }
 
 /**
@@ -147,7 +144,7 @@ function move_buttons() {
   const num = Number(document.querySelector(".active").id.substring(5));
   document.querySelector("#previous").addEventListener("click", () => {
     if (num - 1 >= 1) {
-      hide_and_show_pages(num - 1);
+      hide_show_pages(num - 1);
     }
   });
 
@@ -183,4 +180,27 @@ function create_pages(pages, selector) {
     document.querySelector(selector).append(div);
   }
   document.querySelector("#page-view-1").style.display = "block";
+}
+
+function create_edit_button(div, post) {
+  fetch("/logged_user")
+    .then(response => response.json())
+    .then(user => {
+      if (user) {
+        if (user["username"] === post["author"]) {
+          const button = document.createElement('button');
+          button.type = "button";
+          button.classList.add("btn", "btn-outline-info", "btn-sm");
+          button.innerHTML = "Edit";
+  
+          button.addEventListener('click', () => edit_post(post, user));
+          
+          div.append(button);
+        }
+      }
+    });
+}
+
+function edit_post(post, user) {
+  // TODO: edit post assync.
 }

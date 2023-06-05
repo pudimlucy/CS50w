@@ -104,7 +104,6 @@ def new_post(request):
     # Renders new post page
     return render(request, "network/new_post.html", {"npform": NewPostForm()})
 
-
 def get_all_posts(request):
     # Gets posts
     posts = Post.objects.all()
@@ -124,6 +123,12 @@ def get_user(request, username):
     user = User.objects.filter(username=username).first()
     return JsonResponse(user.serialize(), safe=False)
 
+def get_logged_user(request):
+    if request.user.is_authenticated:
+        user = User.objects.get(pk=request.user.id)
+        return JsonResponse(user.serialize(), safe=False)
+    else:
+        return JsonResponse(None, safe=False)
 
 def get_following_posts(request, username):
     user = User.objects.filter(username=username).first()
@@ -137,6 +142,18 @@ def get_following_posts(request, username):
     posts = Post.objects.filter(author__in=profiles).order_by("-date")
 
     return JsonResponse([post.serialize() for post in posts], safe=False)
+
+def modify_post(request, id):
+    post = Post.objects.filter(id=id).first()
+    if request.user != post.author:
+        return HttpResponse('Invalid request', status=403)
+    
+    data = json.loads(request.body)
+
+    post.content = data['content']
+    post.save()
+
+    return JsonResponse(post.serialize())
 
 
 @login_required(login_url="login")
