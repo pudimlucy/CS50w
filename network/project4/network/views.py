@@ -69,6 +69,54 @@ def register(request):
 
 
 @login_required(login_url="login")
+def profile_view(request, username):
+    # Gets user and profile
+    profile = User.objects.filter(username=username).first()
+    user = User.objects.get(pk=request.user.id)
+
+    # Profile does not exist
+    if profile is None:
+        return HttpResponseRedirect(reverse("index"))
+
+    # Checks for following
+    if request.user.is_authenticated:
+        relation = UserFollowing.objects.filter(
+            follower=user, following=profile
+        ).first()
+        following = False if relation is None else True
+    else:
+        following = False
+
+    # Renders profile page
+    if request.user.is_authenticated:
+        return render(
+            request,
+            "network/user.html",
+            {
+                "user": user,
+                "profile": profile,
+                "nfollowing": len(profile.follows()),
+                "nfollowers": len(profile.followers()),
+                "following": following,
+            },
+        )
+
+
+@login_required(login_url="login")
+def following_view(request, username):
+    # Checks if logged in user is following/<username>
+    check = User.objects.filter(username=username).first()
+    user = User.objects.get(pk=request.user.id)
+    if check is None or check != user:
+        return HttpResponseRedirect(reverse("index"))
+    # Renders following page
+    return render(
+        request,
+        "network/following.html",
+    )
+
+
+@login_required(login_url="login")
 def new_post(request):
     # Checks for method
     if request.method == "POST":
@@ -104,106 +152,45 @@ def new_post(request):
     # Renders new post page
     return render(request, "network/new_post.html", {"npform": NewPostForm()})
 
-def get_all_posts(request):
-    # Gets posts
-    posts = Post.objects.all()
-    # Returns posts
-    return JsonResponse([post.serialize() for post in posts], safe=False)
-
-
-def get_user_posts(request, username):
-    # Gets user's posts
-    user = User.objects.filter(username=username).first()
-    posts = Post.objects.filter(author=user.id)
-    # Returns posts
-    return JsonResponse([post.serialize() for post in posts], safe=False)
-
-def get_user(request, username):
-    user = User.objects.filter(username=username).first()
-    return JsonResponse(user.serialize(), safe=False)
-
-def get_post(request, id):
-    post = Post.objects.filter(id=id).first()
-    return JsonResponse(post.serialize())
-
-def get_logged_user(request):
-    if request.user.is_authenticated:
-        user = User.objects.get(pk=request.user.id)
-        return JsonResponse(user.serialize(), safe=False)
-    else:
-        return JsonResponse(None, safe=False)
-
-def get_following_posts(request, username):
-    user = User.objects.filter(username=username).first()
-    relations = UserFollowing.objects.filter(follower=user).all()
-
-    profiles = []
-    for relation in relations:
-        profiles.append(relation.following.id)
-
-    profiles = User.objects.filter(pk__in=profiles).all()
-    posts = Post.objects.filter(author__in=profiles).order_by("-date")
-
-    return JsonResponse([post.serialize() for post in posts], safe=False)
 
 def edit_post(request, id):
-    post = Post.objects.filter(id=id).first()
-    if request.user != post.author:
-        return HttpResponse('Invalid request', status=403)
-    
-    data = json.loads(request.body)
+    if request.method == "PUT":
+        # Gets post
+        post = Post.objects.filter(id=id).first()
+        # Checks user
+        if request.user != post.author:
+            return HttpResponse("Invalid request", status=403)
 
-    post.content = data['content']
-    post.save()
+        # Updates post
+        data = json.loads(request.body)
+        post.content = data["content"]
+        post.save()
 
-    return JsonResponse(post.serialize())
-
-
-@login_required(login_url="login")
-def profile_view(request, username):
-    profile = User.objects.filter(username=username).first()
-    user = User.objects.get(pk=request.user.id)
-    if profile is None:
-        return HttpResponseRedirect(reverse("index"))
-
-    if request.user.is_authenticated:
-        relation = UserFollowing.objects.filter(
-            follower=user, following=profile
-        ).first()
-        following = False if relation is None else True
+        # Returns updated post data
+        return JsonResponse(post.serialize())
     else:
-        following = False
-
-    if request.user.is_authenticated:
-        return render(
-            request,
-            "network/user.html",
-            {
-                "user": user,
-                "profile": profile,
-                "nfollowing": len(profile.follows()),
-                "nfollowers": len(profile.followers()),
-                "following": following,
-            },
-        )
+        return HttpResponse("Invalid request", status=403)
 
 
 @login_required(login_url="login")
 def follow(request):
     if request.method == "POST":
-        profile = request.POST.get("profile_id")
-        profile = User.objects.filter(id=profile).first()
-        if profile is None:
-            return HttpResponse('Invalid request', status=403)
+        # Gets profile and user
+        profile = User.objects.filter(id=request.POST.get("profile_id")).first()
         user = User.objects.get(pk=request.user.id)
+        if profile or user is None:
+            return HttpResponse("Invalid request", status=403)
 
+        # Checks user-profile relation
         if request.POST.get("following") == "True":
+            # Unfollows
             relation = UserFollowing.objects.filter(
                 follower=user,
                 following=profile,
             ).first()
             relation.delete()
         elif user != profile:
+            # Follows
             try:
                 relation = UserFollowing(
                     follower=user,
@@ -219,19 +206,61 @@ def follow(request):
                     },
                 )
         else:
-            return HttpResponse('Invalid request', status=403)
+            return HttpResponse("Invalid request", status=403)
         return HttpResponseRedirect("/profile/" + profile.username)
     else:
-        return HttpResponse('Invalid request', status=403)
+        return HttpResponse("Invalid request", status=403)
 
 
-@login_required(login_url="login")
-def following_view(request, username):
-    profile = User.objects.filter(username=username).first()
-    user = User.objects.get(pk=request.user.id)
-    if profile is None or profile != user:
-        return HttpResponseRedirect(reverse("index"))
-    return render(
-        request,
-        "network/following.html",
-    )
+def get_user(request, username):
+    # Gets user
+    user = User.objects.filter(username=username).first()
+    # Returns user's data
+    return JsonResponse(user.serialize(), safe=False)
+
+
+def get_logged_user(request):
+    # Returns user's data if logged in
+    if request.user.is_authenticated:
+        user = User.objects.get(pk=request.user.id)
+        return JsonResponse(user.serialize(), safe=False)
+    # Empty response otherwise
+    else:
+        return JsonResponse(None, safe=False)
+
+
+def get_post(request, id):
+    post = Post.objects.filter(id=id).first()
+    return JsonResponse(post.serialize())
+
+
+def get_all_posts(request):
+    # Gets posts
+    posts = Post.objects.all()
+    # Returns posts
+    return JsonResponse([post.serialize() for post in posts], safe=False)
+
+
+def get_user_posts(request, username):
+    # Gets user's posts
+    user = User.objects.filter(username=username).first()
+    posts = Post.objects.filter(author=user.id)
+    # Returns posts
+    return JsonResponse([post.serialize() for post in posts], safe=False)
+
+
+def get_following_posts(request, username):
+    # Get's users follows
+    user = User.objects.filter(username=username).first()
+    relations = UserFollowing.objects.filter(follower=user).all()
+
+    profiles = []
+    for relation in relations:
+        profiles.append(relation.following.id)
+
+    # Gets posts made by user's follows sorted by date
+    profiles = User.objects.filter(pk__in=profiles).all()
+    posts = Post.objects.filter(author__in=profiles).order_by("-date")
+
+    # Returns posts
+    return JsonResponse([post.serialize() for post in posts], safe=False)

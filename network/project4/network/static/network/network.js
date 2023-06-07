@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', function () {
-  document.querySelector('#all-posts').addEventListener('click', () => display_posts("#view-all", "/posts"));
+  document.querySelector('#all-posts').addEventListener('click', () => displayPosts("#view-all", "/posts"));
   if (window.location.pathname === "/") {
-    display_posts("#view-all", "/posts");
+    displayPosts("#view-all", "/posts");
   } else if (window.location.pathname.substring(0, 9) === "/profile/") {
-    display_posts("#view-user", "/userposts/", (window.location.pathname.substring(9,)));
+    displayPosts("#view-user", "/userposts/", (window.location.pathname.substring(9,)));
   } else if (window.location.pathname.substring(0, 11) === "/following/") {
-    display_posts("#view-following", "/follows/", (window.location.pathname.substring(11,)));
+    displayPosts("#view-following", "/follows/", (window.location.pathname.substring(11,)));
   }
 });
 
@@ -16,17 +16,17 @@ document.addEventListener('DOMContentLoaded', function () {
  * @param   href The link from which the posts must be fetched.
  * @param   username Username for user-specific pages (following and profile).
  */
-function display_posts(selector, href, username = "") {
+function displayPosts(selector, href, username = "") {
   fetch(href + username)
     .then(response => response.json())
     .then(posts => {
       if (posts.length > 0) {
         pages = Math.ceil(posts.length / 10)
-        nav_template(pages);
-        page_buttons();
-        move_buttons();
-        create_pages(pages, selector);
-        append_posts(posts);
+        navTemplate(pages);
+        pageButtons();
+        moveButtons();
+        createPages(pages, selector);
+        appendPosts(posts);
       } else {
         document.querySelector("#message").innerHTML = `
         <div class="alert alert-warning" role="alert">
@@ -41,17 +41,21 @@ function display_posts(selector, href, username = "") {
  *
  * @param   posts  An iterable containing the JSON responses of posts to be appended.
  */
-function append_posts(posts) {
+function appendPosts(posts) {
   // Counts index 
   index = 0;
   posts.forEach(post => {
     // Defines page to append the post, given 10 posts per page
     page = Math.floor(index / 10) + 1;
 
-    // Creates a div to post and adds an event listener to display user's profile
-    const div = create_post_div(post);
-    create_edit_button(div, post);
-    add_user_redirect(div, post);
+    // Creates a div to post 
+    const div = createPostDiv(post);
+    createEditButton(div, post);
+
+    // Adds an event listener to display user's profile
+    div.children[0].addEventListener('click', () => {
+      window.location.replace('/profile/' + post['author']);
+    })
 
     // Appends post to proper page
     document.querySelector("#page-view-" + page).append(div);
@@ -66,7 +70,7 @@ function append_posts(posts) {
  * @param   post  A JSON response containing the post's data: id, author, content and publication date.
  * @returns A div containg the post template.
  */
-function create_post_div(post) {
+function createPostDiv(post) {
   let div;
   if (document.getElementById(post["id"]) === null) {
     div = document.createElement('div');
@@ -85,23 +89,11 @@ function create_post_div(post) {
 }
 
 /**
- * Adds an event listener to a post's title that redirects to author's profile.
- *
- * @param   div  A div containg the post template.
- * @param   post A JSON response containing the post's data: id, author, content and publication date.
- */
-function add_user_redirect(div, post) {
-  div.children[0].addEventListener('click', () => {
-    window.location.replace('/profile/' + post['author']);
-  })
-}
-
-/**
  * Creates pagination nav template.
  *
  * @param   pages  Quantity of pages.
  */
-function nav_template(pages) {
+function navTemplate(pages) {
   // Creates pagination container and previous/next buttons
   document.querySelector("#navigation").innerHTML = `
   <ul class="pagination">
@@ -130,7 +122,7 @@ function nav_template(pages) {
 /**
  * Adds event listeners to page buttons.
  */
-function page_buttons() {
+function pageButtons() {
   document.querySelectorAll(".page-number").forEach(page => {
     page.addEventListener("click", () => {
       const num = page.id.substring(5);
@@ -145,17 +137,17 @@ function page_buttons() {
 /**
  * Adds event listeners to previous and next buttons.
  */
-function move_buttons() {
+function moveButtons() {
   const num = Number(document.querySelector(".active").id.substring(5));
+
   document.querySelector("#previous").addEventListener("click", () => {
     if (num - 1 >= 1) {
-      hide_show_pages(num - 1);
+      filterPages(num - 1);
     }
   });
-
   document.querySelector("#next").addEventListener("click", () => {
     if (num + 1 <= document.querySelectorAll(".page-number").length) {
-      hide_show_pages(num + 1);
+      filterPages(num + 1);
     }
   });
 }
@@ -164,7 +156,7 @@ function move_buttons() {
  * Handles page display.
  * @param   num Number of the page to be displayed.
  */
-function hide_show_pages(num) {
+function filterPages(num) {
   document.querySelector(".active").classList.remove("active");
   document.querySelector("#page-" + num).classList.add("active");
   document.querySelector(".page-view[style*='block']").style.display = "none";
@@ -176,7 +168,7 @@ function hide_show_pages(num) {
  * @param   pages Number of pages.
  * @param   selector View div to append pages.
  */
-function create_pages(pages, selector) {
+function createPages(pages, selector) {
   for (let i = 1; i <= pages; i++) {
     const div = document.createElement("div");
     div.style.display = "none";
@@ -187,7 +179,7 @@ function create_pages(pages, selector) {
   document.querySelector("#page-view-1").style.display = "block";
 }
 
-function create_edit_button(div, post) {
+function createEditButton(div, post) {
   fetch("/logged_user")
     .then(response => response.json())
     .then(user => {
@@ -198,7 +190,7 @@ function create_edit_button(div, post) {
           button.classList.add("btn", "btn-outline-info", "btn-sm");
           button.innerHTML = "Edit";
 
-          button.addEventListener('click', () => edit_post_form(post, user));
+          button.addEventListener('click', () => editPostForm(post, user));
 
           div.append(button);
         }
@@ -206,7 +198,7 @@ function create_edit_button(div, post) {
     });
 }
 
-function edit_post_form(post) {
+function editPostForm(post) {
   textarea = document.getElementById(post["id"]).children[1];
   textarea.innerHTML = `
   <textarea class="form-control" id="edit-${post['id']}" rows="3">${post['content']}</textarea>
@@ -215,11 +207,11 @@ function edit_post_form(post) {
   button = document.getElementById(post["id"]).children[3];
   button.removeEventListener('click', edit_post_form);
   button.innerHTML = `Save`;
-  button.addEventListener('click', () => submit_edit(post));
+  button.addEventListener('click', () => submitEdit(post));
 }
 
 // TODO: csrf token for PUT request, currently returns 403
-function submit_edit(update) {
+function submitEdit(update) {
   content = document.getElementById(update["id"]).children[1].children[0].innerHTML;
   fetch('/edit_post/' + update['id'], {
     method: "PUT",
@@ -230,7 +222,7 @@ function submit_edit(update) {
     .then(_ => {
       fetch('/post/' + update['id'])
         .then(post => {
-          document.getElementById(update["id"]).replaceWith(create_post_div(post));
+          document.getElementById(update["id"]).replaceWith(createPostDiv(post));
         })
     })
 }
