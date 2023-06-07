@@ -67,15 +67,20 @@ function append_posts(posts) {
  * @returns A div containg the post template.
  */
 function create_post_div(post) {
-  const div = document.createElement('div');
-  div.classList.add("card-body", "border", "border-1", "post");
-  div.id = post["id"]
+  let div;
+  if (document.getElementById(post["id"]) === null) {
+    div = document.createElement('div');
+    div.classList.add("card-body", "border", "border-1", "post");
+    div.id = post["id"]
+  } else {
+    div = document.getElementById(post["id"]);
+  }
   div.innerHTML += `
   <strong><h5 class="card-title" href="/profile/${post['author']}">${post['author']}</h5></strong>
-  <div class="card-text">${post['content']}
+  <div class="card-text">${post['content']}</div class="card-text">
   <em><h6 class="card-subtitle text-muted">${post['date']}</h6></em>
   `;
-  
+
   return div;
 }
 
@@ -192,15 +197,40 @@ function create_edit_button(div, post) {
           button.type = "button";
           button.classList.add("btn", "btn-outline-info", "btn-sm");
           button.innerHTML = "Edit";
-  
-          button.addEventListener('click', () => edit_post(post, user));
-          
+
+          button.addEventListener('click', () => edit_post_form(post, user));
+
           div.append(button);
         }
       }
     });
 }
 
-function edit_post(post, user) {
-  // TODO: edit post assync.
+function edit_post_form(post) {
+  textarea = document.getElementById(post["id"]).children[1];
+  textarea.innerHTML = `
+  <textarea class="form-control" id="edit-${post['id']}" rows="3">${post['content']}</textarea>
+  <p></p>
+  `;
+  button = document.getElementById(post["id"]).children[3];
+  button.removeEventListener('click', edit_post_form);
+  button.innerHTML = `Save`;
+  button.addEventListener('click', () => submit_edit(post));
+}
+
+// TODO: csrf token for PUT request, currently returns 403
+function submit_edit(update) {
+  content = document.getElementById(update["id"]).children[1].children[0].innerHTML;
+  fetch('/edit_post/' + update['id'], {
+    method: "PUT",
+    body: JSON.stringify({
+      'content': content,
+    }),
+  })
+    .then(_ => {
+      fetch('/post/' + update['id'])
+        .then(post => {
+          document.getElementById(update["id"]).replaceWith(create_post_div(post));
+        })
+    })
 }

@@ -118,10 +118,13 @@ def get_user_posts(request, username):
     # Returns posts
     return JsonResponse([post.serialize() for post in posts], safe=False)
 
-
 def get_user(request, username):
     user = User.objects.filter(username=username).first()
     return JsonResponse(user.serialize(), safe=False)
+
+def get_post(request, id):
+    post = Post.objects.filter(id=id).first()
+    return JsonResponse(post.serialize())
 
 def get_logged_user(request):
     if request.user.is_authenticated:
@@ -143,7 +146,7 @@ def get_following_posts(request, username):
 
     return JsonResponse([post.serialize() for post in posts], safe=False)
 
-def modify_post(request, id):
+def edit_post(request, id):
     post = Post.objects.filter(id=id).first()
     if request.user != post.author:
         return HttpResponse('Invalid request', status=403)
@@ -191,7 +194,7 @@ def follow(request):
         profile = request.POST.get("profile_id")
         profile = User.objects.filter(id=profile).first()
         if profile is None:
-            return HttpResponseRedirect(reverse("index"))
+            return HttpResponse('Invalid request', status=403)
         user = User.objects.get(pk=request.user.id)
 
         if request.POST.get("following") == "True":
@@ -216,10 +219,10 @@ def follow(request):
                     },
                 )
         else:
-            return HttpResponseRedirect(reverse("index"))
+            return HttpResponse('Invalid request', status=403)
         return HttpResponseRedirect("/profile/" + profile.username)
     else:
-        return HttpResponseRedirect(reverse("index"))
+        return HttpResponse('Invalid request', status=403)
 
 
 @login_required(login_url="login")
