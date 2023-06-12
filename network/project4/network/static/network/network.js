@@ -59,6 +59,12 @@ function displayPosts(selector, href, username = "") {
  * @param   posts  An iterable containing the JSON responses of posts to be appended.
  */
 function appendPosts(posts) {
+  let user;
+  fetch("/logged_user")
+    .then(response => response.json())
+    .then(user => {
+      user = user
+    });
   // Counts index 
   index = 0;
   posts.forEach(post => {

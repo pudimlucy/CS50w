@@ -129,7 +129,9 @@ def new_post(request):
                 author = request.user
 
                 # Saves new post
-                post = Post(content=content, author=author, date=datetime.datetime.now())
+                post = Post(
+                    content=content, author=author, date=datetime.datetime.now()
+                )
                 post.save()
             except IntegrityError:
                 return render(
@@ -180,7 +182,8 @@ def follow(request):
         # Gets profile and user
         profile = User.objects.filter(id=request.POST.get("profile_id")).first()
         user = User.objects.get(pk=request.user.id)
-        if profile or user is None:
+
+        if profile is None or user is None:
             return HttpResponse("Invalid request", status=403)
 
         # Checks user-profile relation
