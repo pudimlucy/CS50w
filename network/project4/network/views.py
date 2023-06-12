@@ -1,4 +1,5 @@
 import json
+import datetime
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import JsonResponse
@@ -128,7 +129,7 @@ def new_post(request):
                 author = request.user
 
                 # Saves new post
-                post = Post(content=content, author=author)
+                post = Post(content=content, author=author, date=datetime.datetime.now())
                 post.save()
             except IntegrityError:
                 return render(
@@ -164,6 +165,7 @@ def edit_post(request, id):
         # Updates post
         data = json.loads(request.body)
         post.content = data["content"]
+        post.date = post.date
         post.save()
 
         # Returns updated post data
