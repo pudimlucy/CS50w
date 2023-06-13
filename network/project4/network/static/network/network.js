@@ -74,6 +74,7 @@ function appendPosts(posts) {
     // Creates a div to post 
     const div = createPostDiv(post);
     createEditButton(div, post);
+    createInteractButtons(div, post);
 
     // Adds an event listener to display user's profile
     div.children[0].addEventListener('click', () => {
@@ -105,6 +106,7 @@ function createPostDiv(post) {
   div.innerHTML += `
   <strong><h5 class="card-title" href="/profile/${post['author']}">${post['author']}</h5></strong>
   <div class="card-text">${post['content']}</div class="card-text">
+  <div class="interact"></div>
   <em><h6 class="card-subtitle text-muted">${post['date']}</h6></em>
   `;
 
@@ -221,6 +223,48 @@ function createEditButton(div, post) {
     });
 }
 
+function createInteractButtons(div, post) {
+  const interact = div.children[2];
+  
+  const like = document.createElement('button');
+  like.type = "button";
+  like.classList.add("btn", "btn-sm");
+  like.innerHTML = `
+  ${post['likes']} <i class="bi bi-hand-thumbs-up"></i
+  `;
+
+  const dislike = document.createElement('button');
+  dislike.type = "button";
+  dislike.classList.add("btn", "btn-sm");
+  dislike.innerHTML = `
+  ${post['dislikes']} <i class="bi bi-hand-thumbs-down"></i>
+  `;
+
+  interact.append(like, dislike);
+  like.addEventListener('click', () => {
+    fetch('/interact', {
+      method: "POST",
+      headers: {'X-CSRFToken': csrftoken},
+      mode: 'same-origin',
+      body: JSON.stringify({
+        'id': post['id'],
+        'type': "like",
+      }),
+    });
+  });
+  dislike.addEventListener('click', () => {
+    fetch('/interact', {
+      method: "POST",
+      headers: {'X-CSRFToken': csrftoken},
+      mode: 'same-origin',
+      body: JSON.stringify({
+        'id': post['id'],
+        'type': "dislike",
+      }),
+    })
+  });
+}
+
 function editPost(post, button) {
   const template = document.getElementById(post["id"]).children[1];
   if (button.innerHTML === "Edit") {
@@ -239,10 +283,6 @@ function editPost(post, button) {
       body: JSON.stringify({
         'content': update,
       }),
-    })
-    .then(() => {
-      button.innerHTML = `Edit`;
-      template.innerHTML = update;
     });
   }
 }

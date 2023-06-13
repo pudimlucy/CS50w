@@ -14,6 +14,7 @@ urlpatterns = [
     path("new_post", views.new_post, name="new_post"),
     path("edit_post/<int:id>", views.edit_post, name="edit"),
     path("follow", views.follow, name="follow"),
+    path("interact", views.interact, name="interact"),
     # API Routes
     path("user/<str:username>", views.get_user, name="user"),
     path("logged_user", views.get_logged_user, name="logged_user"),

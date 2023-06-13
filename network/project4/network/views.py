@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Post, UserFollowing
+from .models import User, Post, UserFollowing, Interaction
 from .forms import NewPostForm
 
 
@@ -72,11 +72,10 @@ def register(request):
 @login_required(login_url="login")
 def profile_view(request, username):
     # Gets user and profile
-    profile = User.objects.filter(username=username).first()
-    user = User.objects.get(pk=request.user.id)
-
-    # Profile does not exist
-    if profile is None:
+    try:
+        profile = User.objects.get(username=username)
+        user = User.objects.get(pk=request.user.id)
+    except User.DoesNotExist:
         return HttpResponseRedirect(reverse("index"))
 
     # Checks for following
@@ -106,9 +105,12 @@ def profile_view(request, username):
 @login_required(login_url="login")
 def following_view(request, username):
     # Checks if logged in user is following/<username>
-    check = User.objects.filter(username=username).first()
-    user = User.objects.get(pk=request.user.id)
-    if check is None or check != user:
+    try:
+        check = User.objects.get(username=username)
+        user = User.objects.get(pk=request.user.id)
+    except User.DoesNotExist:
+        return HttpResponseRedirect(reverse("index"))
+    if check != user:
         return HttpResponseRedirect(reverse("index"))
     # Renders following page
     return render(
@@ -159,7 +161,10 @@ def new_post(request):
 def edit_post(request, id):
     if request.method == "PUT":
         # Gets post
-        post = Post.objects.filter(id=id).first()
+        try:
+            post = Post.objects.get(id=id)
+        except Post.DoesNotExist:
+            return HttpResponse("Invalid request", status=403)
         # Checks user
         if request.user != post.author:
             return HttpResponse("Invalid request", status=403)
@@ -180,19 +185,19 @@ def edit_post(request, id):
 def follow(request):
     if request.method == "POST":
         # Gets profile and user
-        profile = User.objects.filter(id=request.POST.get("profile_id")).first()
-        user = User.objects.get(pk=request.user.id)
-
-        if profile is None or user is None:
+        try:
+            profile = User.objects.get(id=request.POST.get("profile_id"))
+            user = User.objects.get(pk=request.user.id)
+        except User.DoesNotExist:
             return HttpResponse("Invalid request", status=403)
 
         # Checks user-profile relation
         if request.POST.get("following") == "True":
             # Unfollows
-            relation = UserFollowing.objects.filter(
+            relation = UserFollowing.objects.get(
                 follower=user,
                 following=profile,
-            ).first()
+            )
             relation.delete()
         elif user != profile:
             # Follows
@@ -211,31 +216,78 @@ def follow(request):
                     },
                 )
         else:
-            return HttpResponse("Invalid request", status=403)
+            return HttpResponse(status=200)
         return HttpResponseRedirect("/profile/" + profile.username)
     else:
         return HttpResponse("Invalid request", status=403)
 
 
+@login_required(login_url="login")
+def interact(request):
+    data = json.loads(request.body)
+
+    try:
+        post = Post.objects.get(pk=data['id'])
+    except Post.DoesNotExist:
+        return HttpResponse("Invalid request", status=403)
+    
+    try:
+        interacted = User.objects.get(pk=request.user.id)
+    except User.DoesNotExist:
+        return HttpResponse("Invalid request", status=403)
+    
+    try:
+        if data['type'] not in ["like", "dislike"]:
+            raise IntegrityError
+        else:
+            type = (data['type']=="like")
+    except IntegrityError:
+        return HttpResponse("Integrity error", status=403) 
+    
+    try:
+        interaction = Interaction.objects.get(post=post, interacted=interacted)
+    except:
+        interaction = Interaction(
+                post=post, interacted=interacted, type=type
+            )
+        interaction.save()
+        return HttpResponse(status=200)
+    else:
+        interaction.delete()    
+        if interaction.type == type:
+            return HttpResponse(status=200)
+        else:
+            interaction = Interaction(
+                post=post, interacted=interacted, type=type
+            )
+            interaction.save()
+            return HttpResponse(status=200)
+
+
 def get_user(request, username):
     # Gets user
-    user = User.objects.filter(username=username).first()
+    user = User.objects.get(username=username)
     # Returns user's data
     return JsonResponse(user.serialize(), safe=False)
 
 
 def get_logged_user(request):
-    # Returns user's data if logged in
     if request.user.is_authenticated:
         user = User.objects.get(pk=request.user.id)
         return JsonResponse(user.serialize(), safe=False)
     # Empty response otherwise
     else:
         return JsonResponse(None, safe=False)
+        
 
 
 def get_post(request, id):
-    post = Post.objects.filter(id=id).first()
+    # Returns post's data if it exists
+    try:
+        post = Post.objects.get(id=id)
+    # Empty response otherwise
+    except User.DoesNotExist:
+        return JsonResponse(None, safe=False)
     return JsonResponse(post.serialize())
 
 
@@ -248,15 +300,26 @@ def get_all_posts(request):
 
 def get_user_posts(request, username):
     # Gets user's posts
-    user = User.objects.filter(username=username).first()
-    posts = Post.objects.filter(author=user.id)
+    try:
+        user = User.objects.get(username=username)
+    # Empty response if no user
+    except User.DoesNotExist:
+        return JsonResponse(None, safe=False)
+    posts = Post.objects.filter(author=user.id).all()
     # Returns posts
     return JsonResponse([post.serialize() for post in posts], safe=False)
 
 
 def get_following_posts(request, username):
     # Get's users follows
-    user = User.objects.filter(username=username).first()
+    try:
+        user = User.objects.get(pk=request.user.id)
+        check = User.objects.get(username=username)
+        if user != check:
+            raise User.DoesNotExist
+    # Empty response if no user
+    except User.DoesNotExist:
+        return JsonResponse(None, safe=False)
     relations = UserFollowing.objects.filter(follower=user).all()
 
     profiles = []
