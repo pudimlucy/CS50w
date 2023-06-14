@@ -106,8 +106,8 @@ function createPostDiv(post) {
   div.innerHTML += `
   <strong><h5 class="card-title" href="/profile/${post['author']}">${post['author']}</h5></strong>
   <div class="card-text">${post['content']}</div class="card-text">
-  <div class="interact"></div>
-  <em><h6 class="card-subtitle text-muted">${post['date']}</h6></em>
+  <div class="interact" style="display: flex; flex-wrap:nowrap"></div>
+  <em><h6 class="card-subtitle text-muted">${post['date'].substring(0,10)} ${post['date'].substring(11,16)}</h6></em>
   `;
 
   return div;
@@ -121,7 +121,7 @@ function createPostDiv(post) {
 function navTemplate(pages) {
   // Creates pagination container and previous/next buttons
   document.querySelector("#navigation").innerHTML = `
-  <ul class="pagination">
+  <ul class="pagination justify-content-end">
       <li class="page-item"><a class="page-link" id="previous">Previous</a></li>
       <div>
           <ul class="pagination" id="pagination">
@@ -173,7 +173,7 @@ function moveButtons() {
   document.querySelector("#next").addEventListener("click", () => {
     if (num + 1 <= document.querySelectorAll(".page-number").length) {
       filterPages(num + 1);
-    }
+    } 
   });
 }
 
@@ -258,8 +258,13 @@ function createInteract(div, post) {
     button.type = "button";
     button.classList.add("btn", "btn-sm", "btn-outline-info");
     button.style.borderColor = 'transparent';
-    button.innerHTML = post[types[i]] + `  <i class="bi bi-hand-thumbs-` + ((i === 0) ? `up"></i>` : `down"></i>`);
-    interact.append(button)
+    button.innerHTML = `<i class="bi bi-hand-thumbs-` + ((i === 0) ? `up"></i>` : `down"></i>`);
+    likeDislike = document.createElement('div');
+    likeDislike.innerHTML = `<div>${post[types[i]]}</div>`;
+    likeDislike.style.display = "flex";
+    likeDislike.style.flexWrap = "nowrap";
+    likeDislike.append(button);
+    interact.append(likeDislike);
   }
   eventInteract(div, post);
 }
@@ -268,7 +273,7 @@ function eventInteract(div, post) {
   const interact = div.children[2];
   const types = ['like', 'dislike'];
   for (let i = 0; i < types.length; i++) {
-    interact.children[i].addEventListener('click', () => {
+    interact.children[i].children[1].addEventListener('click', () => {
       fetch('/interact', {
         method: "POST",
         headers: {'X-CSRFToken': csrftoken},
@@ -280,20 +285,20 @@ function eventInteract(div, post) {
       })
         .then(response => response.json())
         .then(update => {
-          updateInteract(update, div);
+          updateInteract(div, update);
         });
     });
   }
 }
 
-function updateInteract(update, div) {
+function updateInteract(div, update) {
   const interact = div.children[2];
   const types = ['likes', 'dislikes'];
   for (let i = 0; i < types.length; i++) {
-    interact.children[i].innerHTML = `
+    interact.children[i].children[0].innerHTML = `
     ${update[types[i]]}
     `;
-    icon = `<i class="bi bi-hand-thumbs-` + ((types[i] === "likes") ? `up"></i>` : `down"></i>`);
-    interact.children[i].innerHTML += icon;
+    // icon = `<i class="bi bi-hand-thumbs-` + ((types[i] === "likes") ? `up"></i>` : `down"></i>`);
+    // interact.children[i].children[0].innerHTML = icon;
   }
 }
