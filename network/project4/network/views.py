@@ -227,39 +227,35 @@ def interact(request):
     data = json.loads(request.body)
 
     try:
-        post = Post.objects.get(pk=data['id'])
+        post = Post.objects.get(pk=data["id"])
     except Post.DoesNotExist:
         return HttpResponse("Invalid request", status=403)
-    
+
     try:
         interacted = User.objects.get(pk=request.user.id)
     except User.DoesNotExist:
         return HttpResponse("Invalid request", status=403)
-    
+
     try:
-        if data['type'] not in ["like", "dislike"]:
+        if data["type"] not in ["like", "dislike"]:
             raise IntegrityError
         else:
-            type = (data['type']=="like")
+            type = data["type"] == "like"
     except IntegrityError:
-        return HttpResponse("Integrity error", status=403) 
-    
+        return HttpResponse("Integrity error", status=403)
+
     try:
         interaction = Interaction.objects.get(post=post, interacted=interacted)
     except:
-        interaction = Interaction(
-                post=post, interacted=interacted, type=type
-            )
+        interaction = Interaction(post=post, interacted=interacted, type=type)
         interaction.save()
         return JsonResponse(post.serialize())
     else:
-        interaction.delete()    
+        interaction.delete()
         if interaction.type == type:
             return JsonResponse(post.serialize())
         else:
-            interaction = Interaction(
-                post=post, interacted=interacted, type=type
-            )
+            interaction = Interaction(post=post, interacted=interacted, type=type)
             interaction.save()
             return JsonResponse(post.serialize())
 
@@ -278,7 +274,6 @@ def get_logged_user(request):
     # Empty response otherwise
     else:
         return JsonResponse(None, safe=False)
-        
 
 
 def get_post(request, id):

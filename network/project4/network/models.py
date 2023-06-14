@@ -42,10 +42,10 @@ class Post(models.Model):
             "likes": len(self.likes()),
             "dislikes": len(self.dislikes()),
         }
-    
+
     def likes(self):
         return Interaction.objects.filter(post=self, type=True).all()
-    
+
     def dislikes(self):
         return Interaction.objects.filter(post=self, type=False).all()
 
@@ -58,14 +58,12 @@ class UserFollowing(models.Model):
         User, related_name="following", on_delete=models.CASCADE
     )
 
+
 class Interaction(models.Model):
-    post = models.ForeignKey(
-        Post, related_name="post", on_delete=models.CASCADE
-    )
+    post = models.ForeignKey(Post, related_name="post", on_delete=models.CASCADE)
     interacted = models.ForeignKey(
         User, related_name="interacted", on_delete=models.CASCADE
     )
 
     # True = Like, False = Dislike
     type = models.BooleanField()
-
