@@ -74,7 +74,7 @@ function appendPosts(posts) {
     // Creates a div to post 
     const div = createPostDiv(post);
     createEditButton(div, post);
-    createInteractButtons(div, post);
+    createInteract(div, post);
 
     // Adds an event listener to display user's profile
     div.children[0].addEventListener('click', () => {
@@ -215,7 +215,7 @@ function createEditButton(div, post) {
           button.classList.add("btn", "btn-outline-info", "btn-sm");
           button.innerHTML = "Edit";
 
-          button.addEventListener('click', () => editPost(post, button));
+          button.addEventListener('click', () => eventEdit(post, button));
 
           div.append(button);
         }
@@ -223,49 +223,7 @@ function createEditButton(div, post) {
     });
 }
 
-function createInteractButtons(div, post) {
-  const interact = div.children[2];
-  
-  const like = document.createElement('button');
-  like.type = "button";
-  like.classList.add("btn", "btn-sm");
-  like.innerHTML = `
-  ${post['likes']} <i class="bi bi-hand-thumbs-up"></i
-  `;
-
-  const dislike = document.createElement('button');
-  dislike.type = "button";
-  dislike.classList.add("btn", "btn-sm");
-  dislike.innerHTML = `
-  ${post['dislikes']} <i class="bi bi-hand-thumbs-down"></i>
-  `;
-
-  interact.append(like, dislike);
-  like.addEventListener('click', () => {
-    fetch('/interact', {
-      method: "POST",
-      headers: {'X-CSRFToken': csrftoken},
-      mode: 'same-origin',
-      body: JSON.stringify({
-        'id': post['id'],
-        'type': "like",
-      }),
-    });
-  });
-  dislike.addEventListener('click', () => {
-    fetch('/interact', {
-      method: "POST",
-      headers: {'X-CSRFToken': csrftoken},
-      mode: 'same-origin',
-      body: JSON.stringify({
-        'id': post['id'],
-        'type': "dislike",
-      }),
-    })
-  });
-}
-
-function editPost(post, button) {
+function eventEdit(post, button) {
   const template = document.getElementById(post["id"]).children[1];
   if (button.innerHTML === "Edit") {
     template.innerHTML = `
@@ -275,14 +233,67 @@ function editPost(post, button) {
     button.innerHTML = `Save`;
   } 
   else if (button.innerHTML === "Save") {
-    const update = document.getElementById(post["id"]).children[1].querySelector('.editor').value;
+    const content = document.getElementById(post["id"]).children[1].querySelector('.editor').value;
     fetch('/edit_post/' + post["id"], {
       method: "PUT",
       headers: {'X-CSRFToken': csrftoken},
       mode: 'same-origin',
       body: JSON.stringify({
-        'content': update,
+        'content': content,
       }),
+    })
+    .then(() => {
+      template.innerHTML = content;
+      button.innerHTML = `Edit`;
     });
+  }
+}
+
+function createInteract(div, post) {
+  const interact = div.children[2];
+  const types = ['likes', 'dislikes'];
+  let button = undefined;
+  for (let i = 0; i < types.length; i++) {
+    button = document.createElement('button');
+    button.type = "button";
+    button.classList.add("btn", "btn-sm", "btn-outline-info");
+    button.style.borderColor = 'transparent';
+    button.innerHTML = post[types[i]] + `  <i class="bi bi-hand-thumbs-` + ((i === 0) ? `up"></i>` : `down"></i>`);
+    interact.append(button)
+  }
+  eventInteract(div, post);
+}
+
+function eventInteract(div, post) {
+  const interact = div.children[2];
+  const types = ['like', 'dislike'];
+  for (let i = 0; i < types.length; i++) {
+    interact.children[i].addEventListener('click', () => {
+      fetch('/interact', {
+        method: "POST",
+        headers: {'X-CSRFToken': csrftoken},
+        mode: 'same-origin',
+        body: JSON.stringify({
+          'id': post['id'],
+          'type': types[i],
+        }),
+      })
+        .then(response => response.json())
+        .then(update => {
+          updateInteract(update, div);
+        });
+    });
+  }
+}
+
+function updateInteract(update, div) {
+  const interact = div.children[2];
+  const types = ['likes', 'dislikes'];
+  for (let i = 0; i < types.length; i++) {
+    interact.children[i].innerHTML = `
+    ${update[types[i]]}
+    `;
+    icon = `<i class="bi bi-hand-thumbs-` + ((types[i] === "likes") ? `up"></i>` : `down"></i>`);
+    interact.children[i].innerHTML += icon;
   }
 }

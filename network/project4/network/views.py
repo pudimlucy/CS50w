@@ -251,17 +251,17 @@ def interact(request):
                 post=post, interacted=interacted, type=type
             )
         interaction.save()
-        return HttpResponse(status=200)
+        return JsonResponse(post.serialize())
     else:
         interaction.delete()    
         if interaction.type == type:
-            return HttpResponse(status=200)
+            return JsonResponse(post.serialize())
         else:
             interaction = Interaction(
                 post=post, interacted=interacted, type=type
             )
             interaction.save()
-            return HttpResponse(status=200)
+            return JsonResponse(post.serialize())
 
 
 def get_user(request, username):
